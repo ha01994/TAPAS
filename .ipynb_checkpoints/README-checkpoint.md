@@ -22,7 +22,7 @@ ESM-2 embeddings optionally augment the feature set.
 │   ├── dataset_iptm_filtered_rs/       # ipTM-filtered random-split folds
 │   └── dataset_iptm_filtered_ss/       # ipTM-filtered shared-split folds
 │
-├── tapas_vdjdbiedb_after_iptm_pos/     # Positive sample feature extraction
+├── tabpfn_vdjdbiedb_after_iptm_pos/    # Positive sample feature extraction
 │   ├── make_sites_file.py              # Generate AlphaFast sites input
 │   ├── extract_pae_matrix.py           # Extract PAE matrices from AF3 outputs
 │   ├── extract_pae_features.py         # Compute PAE interface features
@@ -32,7 +32,7 @@ ESM-2 embeddings optionally augment the feature set.
 │   ├── pae_feat_vdjdbiedb.csv          # Extracted PAE features (positives)
 │   └── results_model_quality_metrics*.csv
 │
-├── tapas_vdjdbiedb_after_iptm_neg/     # Negative sample feature extraction
+├── tabpfn_vdjdbiedb_after_iptm_neg/    # Negative sample feature extraction
 │   ├── make_sites_file.py
 │   ├── extract_pae_matrix.py
 │   ├── extract_pae_features.py
@@ -41,11 +41,11 @@ ESM-2 embeddings optionally augment the feature set.
 │   ├── pae_feat_vdjdbiedb_neg.csv      # Extracted PAE features (negatives)
 │   └── results_model_quality_metrics*.csv
 │
-├── tapas_vdjdbiedb_combined_after_iptm/   # TAPAS training & evaluation
-│   ├── train_tapas_conf.py             # Train: Conf features only
-│   ├── train_tapas_pae.py              # Train: PAE features only
-│   ├── train_tapas_conf_pae.py         # Train: Conf + PAE
-│   ├── train_tapas_esm_conf_pae.py     # Train: Conf + PAE + ESM-2
+├── tabpfn_vdjdbiedb_combined_after_iptm/  # TAPAS training & evaluation
+│   ├── train_tabpfn_conf.py            # Train: Conf features only
+│   ├── train_tabpfn_pae.py             # Train: PAE features only
+│   ├── train_tabpfn_conf_pae.py        # Train: Conf + PAE
+│   ├── train_tabpfn_esm_conf_pae.py    # Train: Conf + PAE + ESM-2
 │   ├── test_zeroshot_iptm.py           # Zero-shot ipTM evaluation
 │   ├── test_zeroshot_individual.py     # Zero-shot per-feature evaluation
 │   └── results_auc/                    # AUC result CSVs per feature set & split
