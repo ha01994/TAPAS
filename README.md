@@ -8,6 +8,7 @@ TAPAS predicts TCR–pMHC binding by combining AlphaFold3 structural confidence 
 AlphaFast is used to efficiently generate AF3 confidence metrics (ipTM, Conf) and PAE interface features for large TCR–pMHC datasets.
 
 **Feature set**: AF3 Conf + PAE interface features + ESM-2 embeddings
+
 **Training data**: VDJdb + IEDB (score=0 included), filtered to ipTM ≥ 0.7 → 2,194 positives
 
 ## Environment
@@ -18,11 +19,17 @@ conda env create -f environment.yml
 
 ## Pipeline
 
-```
-1. vdjdbiedb/          Build dataset splits
-2. pos/ neg/           Compute confidence metrics, PAE, ESM embeddings
-3. combined/           Train/test TAPAS model
-```
+1. `vdjdbiedb/`
+   - Build dataset splits (RS/SS, folds)
+   - Generate negatives
+
+2. `pos/` and `neg/` (after ipTM filtering)
+   - Compute AF3 confidence metrics (Conf)
+   - Extract PAE interface features
+   - Compute ESM-2 embeddings
+
+3. `combined/` (after ipTM filtering)
+   - Train and evaluate the TAPAS TabPFN classifier
 
 ## Repository Structure
 
