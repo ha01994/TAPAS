@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Overlay histogram of iptm_tcrpmhc for pos vs neg CSVs (VDJDBIEDB filtered best)."""
 from __future__ import annotations
 
 import argparse

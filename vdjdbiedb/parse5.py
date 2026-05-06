@@ -26,7 +26,7 @@ for jj in [0,1,2]:
         os.makedirs(output_dir)
 
     for row in select_rows:        
-        # csv 형식: id, va, vb, pep, hla, b2m 순서 가정
+        # CSV format assumed: id, va, vb, pep, hla, b2m
         entry_id = row[0]
         va_seq  = row[1]
         vb_seq  = row[2]
@@ -34,7 +34,7 @@ for jj in [0,1,2]:
         hla_seq = row[4]
         b2m_seq = row[5]
 
-        # AlphaFast(AlphaFold 3) 포맷 구성
+        # Build AlphaFast (AlphaFold 3) input format
         data = {
             "name": entry_id,
             "sequences": [
@@ -49,7 +49,7 @@ for jj in [0,1,2]:
             "version": 3
         }
 
-        # 파일 저장 (파일명: id.json)
+        # Save file (filename: id.json)
         file_path = os.path.join(output_dir, f"{entry_id}.json")
         with open(file_path, 'w', encoding='utf-8') as json_file:
             json.dump(data, json_file, indent=2)

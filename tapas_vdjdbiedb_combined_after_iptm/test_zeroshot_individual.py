@@ -1,9 +1,3 @@
-"""
-각 AF3·PAE 메트릭을 하나씩만 점수로 써서 5-fold test에 대해 zeroshot ROC-AUC를 계산한다.
-(학습 없이 원시 메트릭 값으로 rank)
-
-avgipae_pmhc·avgipae_tcr의 산술 평균 avgipae_average도 파생 메트릭으로 포함한다.
-"""
 import os
 import sys
 import time
@@ -49,10 +43,9 @@ def macro_auc_max_fpr(y_true, y_score, pmhc, max_fpr=0.1):
 
 
 def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
-    """fold별 test만 사용: 해당 컬럼 원시 값을 점수로 AUC / macro AUC@0.1."""
     if feature_col not in df_metrics.columns:
         print(
-            f"ERROR: df_metrics에 컬럼 '{feature_col}'이 없습니다.",
+            f"ERROR: df_metrics is missing column '{feature_col}' not found.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -66,7 +59,7 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
         test_file = os.path.join(folder_name, f'fold{i}_test.csv')
         if not os.path.exists(test_file):
             print(
-                f"ERROR: {folder_name} fold{i} test CSV가 없습니다: {test_file}",
+                f"ERROR: {folder_name} fold{i} test CSV not found: {test_file}",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -74,7 +67,7 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
         df_test_raw = pd.read_csv(test_file)
         if len(df_test_raw) == 0:
             print(
-                f"ERROR: {folder_name} fold{i} test CSV에 행이 없습니다.",
+                f"ERROR: {folder_name} fold{i} test CSV has no rows.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -85,7 +78,7 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
         if df_test_f['label'].nunique() < 2:
             print(
                 f"ERROR: {folder_name} fold{i}: "
-                'test에 label 0과 1이 모두 있어야 합니다.',
+                'test must contain both label 0 and 1.',
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -101,7 +94,7 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
         if len(test_df) == 0:
             print(
                 f"ERROR: {folder_name} fold{i} ({feature_col}): "
-                '메트릭 병합 후 test가 비었습니다.',
+                'test became empty after merging metrics.',
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -109,8 +102,8 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
         if len(test_df) != len(df_test_f):
             print(
                 f"ERROR: {folder_name} fold{i} ({feature_col}): "
-                f"메트릭 merge 후 행 수 불일치 (test {len(df_test_f)} vs merge {len(test_df)}). "
-                '일부 id가 df_metrics에 없거나 pdb_id가 중복일 수 있습니다.',
+                f"row count mismatch after merging metrics (test {len(df_test_f)} vs merge {len(test_df)}). "
+                'some ids may be missing from df_metrics, or pdb_id may be duplicated.',
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -120,7 +113,7 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
             n_bad = int(y_scores.isnull().sum())
             print(
                 f"ERROR: {folder_name} fold{i} ({feature_col}): "
-                f'점수 컬럼에 NaN이 {n_bad}개 있습니다.',
+                f'NaN found in score column {n_bad}items present.',
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -136,7 +129,7 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
         if y_scores.nunique() < 2:
             print(
                 f"ERROR: {folder_name} fold{i} ({feature_col}): "
-                "test에서 해당 특징이 상수라 AUC를 정의할 수 없습니다.",
+                "in test, this feature is constant so AUC cannot be defined.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -144,7 +137,7 @@ def evaluate_feature_zeroshot(folder_name, df_metrics, feature_col):
         if len(y_true) == 0 or y_true.nunique() < 2:
             print(
                 f"ERROR: {folder_name} fold{i} ({feature_col}): "
-                "라벨이 부족합니다.",
+                "not enough labels.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -193,11 +186,11 @@ if __name__ == '__main__':
     ]
     metric_dfs = [pd.read_csv(f) for f in metric_files if os.path.exists(f)]
     if not metric_dfs:
-        print('ERROR: 메트릭 CSV 파일이 없습니다.', file=sys.stderr)
+        print('ERROR: metrics CSV file not found.', file=sys.stderr)
         sys.exit(1)
     df_metrics = pd.concat(metric_dfs, ignore_index=True)
     if len(df_metrics) == 0:
-        print('ERROR: 메트릭 데이터프레임이 비어 있습니다.', file=sys.stderr)
+        print('ERROR: metrics dataframe is empty.', file=sys.stderr)
         sys.exit(1)
     print(df_metrics.shape)
 
@@ -208,11 +201,11 @@ if __name__ == '__main__':
     ]
     pae_dfs = [pd.read_csv(f) for f in pae_files if os.path.exists(f)]
     if not pae_dfs:
-        print('ERROR: PAE CSV 파일이 없습니다.', file=sys.stderr)
+        print('ERROR: PAE CSV file not found.', file=sys.stderr)
         sys.exit(1)
     df_pae = pd.concat(pae_dfs, ignore_index=True)
     if len(df_pae) == 0:
-        print('ERROR: PAE 데이터프레임이 비어 있습니다.', file=sys.stderr)
+        print('ERROR: PAE dataframe is empty.', file=sys.stderr)
         sys.exit(1)
     print(df_pae.shape)
 
@@ -225,15 +218,15 @@ if __name__ == '__main__':
     )
     if len(df_metrics) == 0:
         print(
-            'ERROR: 메트릭/PAE 병합 후 샘플이 없습니다. 입력 CSV를 확인하세요.',
+            'ERROR: No samples after merging metrics/PAE. Please check the input CSVs.',
             file=sys.stderr,
         )
         sys.exit(1)
 
     if 'avgipae_pmhc' not in df_metrics.columns or 'avgipae_tcr' not in df_metrics.columns:
         print(
-            "ERROR: avgipae_average 계산에 필요한 'avgipae_pmhc', 'avgipae_tcr' "
-            '컬럼이 없습니다.',
+            "ERROR: Missing columns required to compute avgipae_average: 'avgipae_pmhc', 'avgipae_tcr' "
+            'columns not found.',
             file=sys.stderr,
         )
         sys.exit(1)

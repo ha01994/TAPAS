@@ -16,21 +16,21 @@ def generate_partwise_raw_embeddings():
 
     target_cols = ['peptide', 'A1', 'A2', 'A3', 'B1', 'B2', 'B3']
 
-    # 1. unique sequence 추출
+    # 1. Extract unique sequences
     unique_seqs = set()
     for col in target_cols:
         unique_seqs.update(df[col].dropna().unique())
     unique_seqs = list(unique_seqs)
     print(f"Total rows: {len(df)}, Unique sequences: {len(unique_seqs)}")
 
-    # 2. ESM-2 로드
+    # 2. Load ESM-2
     print(f"\nLoading {MODEL_NAME}...")
     model, alphabet = esm.pretrained.esm2_t33_650M_UR50D()
     batch_converter  = alphabet.get_batch_converter()
     model.eval()
     model.to(DEVICE)
 
-    # 3. raw 1280-dim embedding 계산
+    # 3. Compute raw 1280-dim embeddings
     seq_to_embedding = {}
     data_for_esm = [(str(i), seq) for i, seq in enumerate(unique_seqs)]
 
@@ -48,8 +48,8 @@ def generate_partwise_raw_embeddings():
                 embedding = token_repr[j, 1:seq_len+1].mean(0).cpu().numpy()
                 seq_to_embedding[seq_str] = embedding
 
-    # 4. 파트별 raw matrix 구성
-    # 저장 형태: {id: {'peptide': (1280,), 'A1': (1280,), ..., 'A3': (1280,), ...}}
+    # 4. Build per-part raw matrices
+    # Save format: {id: {'peptide': (1280,), 'A1': (1280,), ..., 'A3': (1280,), ...}}
     print("\nOrganizing per-part raw embeddings...")
     complex_ids = df['id'].astype(str).tolist()
 

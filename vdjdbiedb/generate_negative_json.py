@@ -1,18 +1,10 @@
-"""
-Positive run의 *_data.json 에서 unpaired MSA만 모아 negative용 입력 JSON을 만든다.
-- 하위 폴더(예: vdjdb_full_0/vdjdb_full_0_data.json)까지 재귀 탐색
-- 동일 sample id가 여러 output 폴더에 있으면 리스트 앞쪽(먼저 스캔한) 경로만 사용
-- 상위 메타(modelSeeds 등)는 TCR 소스 우선, 없으면 pMHC 소스, 그다음 기본값
-- 각 protein 블록에 pairedMsa 는 빈 문자열 "" 로 둠 (키는 유지)
-- 성공/스킵/쓰기 실패마다 어떤 positive *_data.json 을 썼는지 CSV 로그
-"""
 import copy
 import csv
 import json
 import os
 from typing import Optional
 
-# AlphaFold3 입력 JSON에서 sequences 외에 유지할 수 있는 상위 키
+# Top-level keys to keep besides 'sequences' in AlphaFold3 input JSON
 _TOP_LEVEL_META_KEYS = (
     "modelSeeds",
     "dialect",
@@ -23,7 +15,6 @@ _TOP_LEVEL_META_KEYS = (
 
 
 def _merge_top_level_metadata(tcr_data: dict, pmhc_data: dict) -> dict:
-    """TCR 소스 우선, 부족하면 pMHC 소스로 채운 뒤 필수 기본값 보강."""
     out = {}
     for k in _TOP_LEVEL_META_KEYS:
         if k in tcr_data:
@@ -40,10 +31,6 @@ def _merge_top_level_metadata(tcr_data: dict, pmhc_data: dict) -> dict:
 
 
 def create_mismatched_json(tcr_source_path, pmhc_source_path, output_path):
-    """
-    TCR 소스의 A,B 체인 + pMHC 소스의 C,D,E 체인을 합친다.
-    unpairedMsa 유지. protein 이면 pairedMsa 는 항상 "".
-    """
     try:
         with open(tcr_source_path, "r", encoding="utf-8") as f:
             tcr_data = json.load(f)
@@ -79,17 +66,13 @@ def create_mismatched_json(tcr_source_path, pmhc_source_path, output_path):
 
 
 def build_file_path_map(folder_list):
-    """
-    각 output 루트 아래 재귀적으로 *_data.json 을 찾는다.
-    동일 file_id(파일명 기준)가 여러 번 나오면 먼저 등록된 경로만 유지한다.
-    """
     file_path_map = {}
     duplicate_count = 0
-    print("📂 폴더 스캔 중 (재귀)...")
+    print("📂 Scanning folders (recursive)...")
 
     for folder in folder_list:
         if not os.path.isdir(folder):
-            print(f"  ⚠️ 경고: 폴더가 없습니다 -> {folder}")
+            print(f"  Warning: folder does not exist -> {folder}")
             continue
 
         for dirpath, _dirnames, filenames in os.walk(folder):
@@ -103,12 +86,11 @@ def build_file_path_map(folder_list):
                     continue
                 file_path_map[file_id] = full_path
 
-    print(f"  -> 고유 sample id {len(file_path_map)}개, 중복 스킵 {duplicate_count}회")
+    print(f"  -> unique sample id {len(file_path_map)}items, duplicates skipped {duplicate_count} times")
     return file_path_map
 
 
 def _positive_sample_id_from_json_path(path: str) -> str:
-    """vdjdb_full_0_data.json -> vdjdb_full_0"""
     base = os.path.basename(path)
     suf = "_data.json"
     if base.endswith(suf):
@@ -117,14 +99,12 @@ def _positive_sample_id_from_json_path(path: str) -> str:
 
 
 def _default_source_log_path(output_dir: str) -> str:
-    """예: .../vdjdb_iedb_neg_json -> .../vdjdb_iedb_neg_json_msa_sources.csv"""
     parent = os.path.dirname(os.path.abspath(output_dir)) or "."
     base = os.path.basename(os.path.abspath(output_dir))
     return os.path.join(parent, f"{base}_msa_sources.csv")
 
 
 def _iter_positive_rows(path):
-    """헤더가 있으면 DictReader, 없으면 id,pmhc,tcr,label 고정 컬럼."""
     with open(path, "r", encoding="utf-8") as f:
         first_line = f.readline()
         if not first_line:
@@ -148,16 +128,12 @@ def process_negatives_multi_folder(
     output_dir,
     source_log_path: Optional[str] = None,
 ):
-    """
-    source_log_path: 각 negative가 어떤 positive *_data.json 에서 TCR(A,B) / pMHC(C,D,E)
-    MSA를 가져왔는지 기록하는 CSV. None이면 output_dir 옆에 ``{basename}_msa_sources.csv`` 생성.
-    """
     id_to_path_map = build_file_path_map(source_folders)
 
     tcr_to_path = {}
     pmhc_to_path = {}
 
-    print("\nStep 1: positive CSV → TCR / pMHC 소스 경로 매핑...")
+    print("\nStep 1: positive CSV → mapping TCR / pMHC source paths...")
     missing_json = 0
     for row in _iter_positive_rows(positive_csv):
         file_id = row["id"].strip()
@@ -172,8 +148,8 @@ def process_negatives_multi_folder(
             missing_json += 1
 
     if missing_json:
-        print(f"  Warning: JSON 없는 positive 행 ~{missing_json}건 (첫 샘플만 경고 생략 가능)")
-    print(f"  -> 매핑: TCR {len(tcr_to_path)}개, pMHC {len(pmhc_to_path)}개")
+        print(f"  Warning: positive row without JSON ~{missing_json} cases (can omit warning after the first sample)")
+    print(f"  -> mapping: TCR {len(tcr_to_path)}items, pMHC {len(pmhc_to_path)}items")
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -190,8 +166,8 @@ def process_negatives_multi_folder(
         "status",
     ]
 
-    print("\nStep 2: negative JSON 생성...")
-    print(f"  소스 추적 로그: {log_path}")
+    print("\nStep 2: generating negative JSON...")
+    print(f"  source trace log: {log_path}")
     success_count = 0
     fail_count = 0
     skip_missing = 0
@@ -212,7 +188,7 @@ def process_negatives_multi_folder(
                 out_json = os.path.join(output_dir, f"{new_id}.json")
 
                 if not tcr_path or not pmhc_path:
-                    print(f"  Skip (소스 없음): {new_id}  tcr={target_tcr!r} pmhc={target_pmhc!r}")
+                    print(f"  Skip (no source): {new_id}  tcr={target_tcr!r} pmhc={target_pmhc!r}")
                     skip_missing += 1
                     fail_count += 1
                     w.writerow(
@@ -252,13 +228,13 @@ def process_negatives_multi_folder(
                     }
                 )
 
-    print(f"\n완료: 성공 {success_count}, 실패(에러+스킵) {fail_count} (그중 소스 미매칭 {skip_missing})")
-    print(f"저장: {output_dir}")
-    print(f"로그: {log_path}")
+    print(f"\nDone: success {success_count}, failed (errors+skips) {fail_count} (among them, source-unmatched {skip_missing})")
+    print(f"saved: {output_dir}")
+    print(f"log: {log_path}")
 
 
 # ---------------------------------------------------------------------------
-# 실행 설정 (경로는 환경에 맞게 수정)
+# Run configuration (adjust paths for your environment)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     input_folders = [

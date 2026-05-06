@@ -20,12 +20,6 @@ residue_mapping = {
 
 
 def cif_to_pdb(cif_file):
-    """
-    Converts a single CIF file to PDB format and saves it in the same folder with the same name.
-    
-    Parameters:
-    - cif_file: str, path to the input CIF file.
-    """
     # Define the output PDB file path (same folder, same name, .pdb extension)
     pdb_file = os.path.splitext(cif_file)[0]
     beem_path = "../../data_augmentation/BeEM/BeEM"#"/gpfs/projects/bsc72/aascunce/data_augmentation/BeEM/BeEM"
@@ -104,15 +98,6 @@ def merge_pdb(pdb_file):
 
 
 def remove_headers(file_path):
-    """
-    Remove non-ATOM/HETATM lines from a PDB file and validate line length.
-
-    Parameters:
-    - file_path: str, path to the PDB file.
-
-    Returns:
-    - List of cleaned lines (ATOM/HETATM and properly formatted).
-    """
     cleaned_lines = []
     with open(file_path, 'r') as file:
         for line in file:
@@ -123,15 +108,6 @@ def remove_headers(file_path):
 
 
 def extract_sequences(pdb_file):
-    """
-    Extract sequences for all chains from a PDB file in two forms:
-    - A dictionary of sequences as single-letter residue codes (string).
-    - A dictionary of sequences as lists of (resname, resid) tuples.
-    
-    Returns:
-    - sequences_str (dict): A dictionary with chain_id as key and sequence as string of 1-letter codes.
-    - sequences_tuples (dict): A dictionary with chain_id as key and sequence as list of tuples (resname, resid).
-    """
     if pdb_file.endswith(".pdb"):
         parser = PDB.PDBParser(QUIET=True)
         structure = parser.get_structure('structure', pdb_file)
@@ -173,10 +149,6 @@ def align_sequences(seqA, seqB):
 
 
 def format_alignment(aln, chain_id_cry, chain_id_mod, dict_cry, dict_mode):
-    """
-    Format the alignment and return the residue names and IDs for each sequence in the alignment.
-    Also return the matches as before ('|' for match, '.' for mismatch, ' ' for gap).
-    """
     aligned_residues = {'seqA': [], 'seqB': [], 'matches': []}
     seqA_aligned = aln[0, :]
     seqB_aligned = aln[1, :]
@@ -208,10 +180,6 @@ def format_alignment(aln, chain_id_cry, chain_id_mod, dict_cry, dict_mode):
 
 
 def get_aligned_residues(alignment):
-    """
-    Map aligned residues from two chains based on a given sequence alignment.
-    Only returns residues that are matches, formatted as (resname, resid_crystal, resid_model).
-    """
     aligned_residues = []
     seqA_aligned = alignment["seqA"]
     seqB_aligned = alignment["seqB"]
@@ -230,13 +198,6 @@ def get_aligned_residues(alignment):
 
 
 def get_interface(pdb_file, reference_chain, chain_ids, distance_cutoff=10.0, select_heavy_atoms=False):
-    """
-    Select Cα atoms from chains A, B, and C that are within a certain distance (default: 10 Å)
-    from any atom of chain C, and also include all Cα atoms from chain C. Optionally, select heavy atoms.
-    Returns:
-    - selected_atoms (list of tuples): A list of atoms (atom name, residue ID, residue name, and chain ID)
-      that are within the distance cutoff from atoms in chain C, plus all Cα atoms from chain C (or all heavy atoms if specified).
-    """
     parser = PDB.PDBParser(QUIET=True)
     structure = parser.get_structure('structure', pdb_file)
     selected_atoms = []
@@ -340,10 +301,6 @@ def run_anarci(sequence):
     
 import re
 def parse_anarci_output(anarci_output):
-    """
-    Returns:
-        list of tuples: A list where each tuple contains (IMGT_number, residue) with unique IMGT numbers.
-    """
     pattern = r'^([A-Z])\s+(\d+)\s+([A-Z\-])'
     matches = re.findall(pattern, anarci_output, re.MULTILINE)
     
@@ -367,16 +324,6 @@ def parse_anarci_output(anarci_output):
 
 
 def map_imgt_to_original(imgt_numbered_seq, pdb_resids):
-    """
-    Map the original numbering of a sequence from the PDB 'resids' to the IMGT numbering.
-    
-    Args:
-        imgt_numbered_seq (list of tuples): The IMGT numbered sequence as tuples (IMGT_number, residue).
-        pdb_resids (list of tuples): The original residue numbers from the PDB file as tuples (resid, residue_one_letter).
-    
-    Returns:
-        list of tuples: A list where each tuple contains (original_resid, IMGT_number, residue).
-    """
     mapping = []
     pdb_resid_index = 0  # Index for PDB residues
     
@@ -410,14 +357,6 @@ def parse_CDR1 (mapping):
 
 
 def extract_atoms_for_cdr(cdr_list, pdb_file, chain_id):
-    """
-    Extract atoms of the residues of a CDR from a PDB file.
-    
-    :param cdr_list: List of tuples in the format (resid, imgtid, resname)
-    :param pdb_file: Path to the PDB file of the structure
-    :param chain_id: Chain ID (e.g., 'A', 'B') to extract the atoms from
-    :return: List of tuples with the format (atomname, resid, resname, chain_id)
-    """
     if pdb_file.endswith(".pdb"):
         parser = PDB.PDBParser(QUIET=True)
     else:
@@ -440,19 +379,6 @@ def extract_atoms_for_cdr(cdr_list, pdb_file, chain_id):
 
 
 def calculate_rmsd(crystal_pdb, model_pdb, pdb_id, chain_dict, distance_cutoff=10.0):
-    """
-    Calculate RMSD between a crystal and a model structure for all chains.
-
-    Args:
-        crystal_pdb (str): Path to the crystal structure PDB file.
-        model_pdb (str): Path to the model structure PDB file.
-        chain_ids (list): List of chain IDs to consider for the interface (default ['A', 'B', 'C']).
-        distance_cutoff (float): Distance cutoff for selecting interface residues (default 10.0 Å).
-
-    Returns:
-        dict: Overall RMSD and chain-specific RMSD details.
-    """
-    
     ########################## Step 1: Parse structures and extract sequences######################
     #print('step 1')
     if model_pdb.endswith(".pdb"):
@@ -491,10 +417,10 @@ def calculate_rmsd(crystal_pdb, model_pdb, pdb_id, chain_dict, distance_cutoff=1
     
     
     
-    print('crystal 에서의 chain mapping')
+    print('chain mapping in crystal')
     print('chain_dict', chain_dict) 
     print()
-    print('model 에서의 chain mapping')
+    print('chain mapping in model')
     print('model_chain_mapping', model_chain_mapping) 
     
     
@@ -541,7 +467,7 @@ def calculate_rmsd(crystal_pdb, model_pdb, pdb_id, chain_dict, distance_cutoff=1
     
     selected_atoms_crystal = sorted(set(get_interface(crystal_pdb, reference_chain, chain_ids=chain_ids,
                                                       distance_cutoff=distance_cutoff, select_heavy_atoms=True)),
-                                    key=lambda x: (x[3], x[1])) #RMSD 는 all heavy atoms 에 대해서 계산함
+                                    key=lambda x: (x[3], x[1])) #RMSD is computed over all heavy atoms
     selected_atoms_model = []
     atoms_to_remove_i = []
     
@@ -825,19 +751,17 @@ def run_dockq(model_path, native_path):
 
 
 '''
-cleaned file 은 
+cleaned files are those processed up to:
 clean_crystal1.py
 clean_model0.py, clean_model1.py
-까지만 마친 파일
 (cleaning)
 
-merged file 은 
+merged files are those processed up to:
 clean_crystal2.py
 clean_crystal3.py
 clean_model2.py
 clean_model3.py
-까지 한 파일
-(2번 코드에서 chain name들을 통일한 후 3번 코드에서 pMHC, TCR 끼리 merging 한 파일)
+(after unifying chain names in step 2, then merging pMHC and TCR in step 3)
 '''
 
 def safe_round(value, precision=8):    
@@ -847,9 +771,6 @@ def safe_round(value, precision=8):
 
     
 def classify_model_quality(tcr_irmsd, dockq):
-    """
-    Classify model quality using TCR interface RMSD and DockQ thresholds.
-    """
     if tcr_irmsd == None or dockq == None:
         print('either tcr_irmsd or dockq is None')        
         exit()
@@ -876,10 +797,10 @@ def main(crystal_folder, model_folder, output_folder):
     pdbs = [x.split('/')[-1] for x in glob.glob(f'{model_folder}/models/*')]
     pdbs.sort()
         
-    '''exclude = ['5yxu','6p64','6uln', # crystal structure is strange (pMHC 거꾸로)                
+    '''exclude = ['5yxu','6p64','6uln', # crystal structure is strange (pMHC reversed)
                # did not analyze from here
-               '6ulr', '6vm7',  '6vm8',  '6vm9', '6vma','6vmc', '7l1d', '7rrg'] 
-    
+               '6ulr', '6vm7',  '6vm8',  '6vm9', '6vma','6vmc', '7l1d', '7rrg']
+
     pdbs = [x for x in pdbs if x not in exclude]'''
     
     

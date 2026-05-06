@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-"""
-Build vdjdbiedb_filtered.csv (vdjdbiedb.csv layout) from:
-  - iptm_filtered_vdjdbiedb.csv
-  - negatives_dataset_iptm_filtered.csv
-using TCR CDR fields from dic_full_vavb.csv (same parsing as build_vdjdbiedb.py).
-
-Columns: id,peptide,A1,A2,A3,B1,B2,B3,binder
-"""
-
 from __future__ import annotations
 
 import argparse

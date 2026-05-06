@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-"""
-Merge dataset_rs + dataset_ss CSVs, join TCR CDR fields from dic_full_vavb.csv,
-and write vdjdbiedb.csv in the same column layout as vdjdb123.csv:
-  id,peptide,A1,A2,A3,B1,B2,B3,binder
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -16,12 +10,6 @@ from typing import Dict, List, Tuple
 
 
 def parse_dic_blob(blob: str) -> Tuple[str, str, str, str, str, str]:
-    """
-    Second column of dic_full_vavb.csv:
-      {alpha_aa}_{beta_aa}_{A1}_{A2}_{A3}_{B1}_{B2}_{B3}_{TRAV...}_{TRAJ...}_{TRBV...}_{TRBJ...}
-    The last 10 underscore tokens are A1..B3 plus four gene names.
-    Everything before that is alpha (first segment) and beta (remaining joined).
-    """
     parts = blob.split("_")
     if len(parts) < 12:
         raise ValueError(f"expected >=12 underscore segments, got {len(parts)}")

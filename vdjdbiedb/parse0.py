@@ -122,7 +122,7 @@ with open('parsed_data_1.csv', 'w') as fw:
             
 
 for s in ['0', '1', '2', '3']:
-    print(f"Score {s}: {score_counts[s]} 개")
+    print(f"Score {s}: {score_counts[s]} items")
     
     
     

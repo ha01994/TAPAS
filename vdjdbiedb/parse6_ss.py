@@ -8,7 +8,6 @@ PARSED_CSV_COLS = ['id', 'pmhc', 'tcr', 'label']
 
 
 def load_parsed_csv(path):
-    """헤더가 있으면 그대로 사용하고, 없으면 id/pmhc/tcr/label 컬럼을 부여한다."""
     df = pd.read_csv(path)
     if 'pmhc' not in df.columns:
         df = pd.read_csv(path, header=None, names=PARSED_CSV_COLS)
@@ -35,17 +34,13 @@ def levenshtein_distance(s1, s2):
 
 
 def generate_negatives(df_subset, ratio, split_type, fold, dist_threshold=3):
-    """
-    Strict Split 환경에서는 df_subset 안에 있는 Peptide들끼리만
-    TCR Swapping이 일어납니다. (Data Leakage 방지)
-    """
     data = df_subset.copy()
     
-    # TCR을 Peptide별로 그룹화
+    # Group TCRs by peptide
     pep_to_tcrs = data.groupby('peptide')['tcr'].apply(list).to_dict()
     unique_peps = list(pep_to_tcrs.keys())
     
-    # 거리 계산 및 호환성 맵 생성
+    # Compute distances and build a compatibility map
     compatible_peps_map = {}
     for p1 in unique_peps:
         compatible = []
@@ -103,13 +98,13 @@ def main():
     unique_peptides = df['peptide'].unique()
     print(f"Total Unique Peptides: {len(unique_peptides)}")
     
-    # Peptide 기준 5-Fold Split
+    # Peptide-based 5-fold split
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
     
     for fold, (train_val_pep_idx, test_pep_idx) in enumerate(kf.split(unique_peptides)):
         print(f"\n[Fold {fold}] Processing Strict Split...")
         
-        # Peptide ID 분리
+        # Split peptide ID
         test_peps = unique_peptides[test_pep_idx]
         train_val_peps = unique_peptides[train_val_pep_idx]
         
@@ -125,7 +120,7 @@ def main():
         print(len(val_pos))
         print(len(test_pos))
         
-        # Negative 생성 (각 Split 별로 독립적으로 수행하여 Leakage 방지)        
+        # Generate negatives (independently per split to prevent leakage)
         train_final = generate_negatives(train_pos, ratio, split_type, fold, dist_threshold=3)
         val_final = generate_negatives(val_pos, ratio, split_type, fold, dist_threshold=3)
         test_final = generate_negatives(test_pos, ratio, split_type, fold, dist_threshold=3)

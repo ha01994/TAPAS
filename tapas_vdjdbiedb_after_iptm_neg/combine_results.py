@@ -1,6 +1,6 @@
 import pandas as pd
 
-# 방법 1: 파일 이름 직접 지정
+# Method 1: specify filenames directly
 files = ['results_model_quality_metrics_0.csv', 
          'results_model_quality_metrics_1.csv', 
          'results_model_quality_metrics_2.csv']

@@ -6,7 +6,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
-# extract_pae_matrix.py 의 OUT_DIR 와 동일한 세 폴더
+# The three folders correspond to OUT_DIR in extract_pae_matrix.py
 PAE_DIRECTORIES = [
     SCRIPT_DIR / 'pae_matrix_vdjdbiedb_neg_0',
     SCRIPT_DIR / 'pae_matrix_vdjdbiedb_neg_1',
@@ -17,10 +17,6 @@ OUTPUT_CSV = SCRIPT_DIR / 'pae_feat_vdjdbiedb_neg.csv'
 
 
 def extract_pae_features(pae_dir):
-    """
-    지정된 디렉토리 내의 모든 _interface_pae.npy 파일을 읽어
-    TabPFN 학습용 통계적 피처를 추출합니다.
-    """
     file_pattern = os.path.join(pae_dir, '*_interface_pae.npy')
     pae_files = glob.glob(file_pattern)
 
@@ -75,24 +71,24 @@ def main():
     for pae_run, pae_dir in enumerate(PAE_DIRECTORIES):
         pae_dir = str(pae_dir)
         if not os.path.isdir(pae_dir):
-            print(f"[WARN] 디렉터리 없음, 스킵: {pae_dir}")
+            print(f"[WARN] directory missing, skipping: {pae_dir}")
             continue
         df = extract_pae_features(pae_dir)
         if df.empty:
-            print(f"[WARN] npy 없음: {pae_dir}")
+            print(f"[WARN] npy not found: {pae_dir}")
             continue
         df['pae_run'] = pae_run
         dfs.append(df)
         print(f"[OK] {pae_dir} → {len(df)} rows")
 
     if not dfs:
-        print("저장할 행이 없습니다.")
+        print("No rows to save.")
         return
 
     pae_features_df = pd.concat(dfs, ignore_index=True)
     pae_features_df.to_csv(OUTPUT_CSV, index=False)
 
-    print(f"\nPAE 피처 저장: {OUTPUT_CSV} (총 {len(pae_features_df)} rows)")
+    print(f"\nSaving PAE features: {OUTPUT_CSV} (total {len(pae_features_df)} rows)")
     print(pae_features_df.head(10))
 
 

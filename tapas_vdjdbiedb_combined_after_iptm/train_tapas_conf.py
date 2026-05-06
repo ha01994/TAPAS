@@ -1,7 +1,3 @@
-"""
-train_tabpfn_conf_pae.py와 동일한 CV/TabPFN 설정이나,
-AF3 품질(confidence) 메트릭만 특징으로 사용하고 PAE는 쓰지 않는다.
-"""
 import os
 import sys
 import time
@@ -56,7 +52,7 @@ def run_cv_evaluation(folder_name, df_metrics):
         test_file = os.path.join(folder_name, f'fold{i}_test.csv')
         if not (os.path.exists(train_file) and os.path.exists(test_file)):
             print(
-                f"ERROR: {folder_name} fold{i} train/test CSV가 없습니다.",
+                f"ERROR: {folder_name} fold{i} train/test CSV not found.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -66,7 +62,7 @@ def run_cv_evaluation(folder_name, df_metrics):
 
         if len(df_train_raw) == 0 or len(df_test_raw) == 0:
             print(
-                f"ERROR: {folder_name} fold{i}에 train 또는 test 행이 없습니다.",
+                f"ERROR: {folder_name} fold{i} has no train or test rows.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -79,13 +75,13 @@ def run_cv_evaluation(folder_name, df_metrics):
 
         if df_train_f['label'].nunique() < 2:
             print(
-                f"ERROR: {folder_name} fold{i} train에 label 0과 1이 모두 필요합니다.",
+                f"ERROR: {folder_name} fold{i} train requires both label 0 and 1.",
                 file=sys.stderr,
             )
             sys.exit(1)
         if df_test_f['label'].nunique() < 2:
             print(
-                f"ERROR: {folder_name} fold{i} test에 label 0과 1이 모두 필요합니다.",
+                f"ERROR: {folder_name} fold{i} test requires both label 0 and 1.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -110,15 +106,15 @@ def run_cv_evaluation(folder_name, df_metrics):
 
         if len(train_df) == 0 or len(test_df) == 0:
             print(
-                f"ERROR: {folder_name} fold{i}에서 메트릭 병합 후 train 또는 test가 비었습니다.",
+                f"ERROR: {folder_name} fold{i} became empty (train or test) after merging metrics.",
                 file=sys.stderr,
             )
             sys.exit(1)
         if len(train_df) != len(df_train_f) or len(test_df) != len(df_test_f):
             print(
-                f"ERROR: {folder_name} fold{i}: 메트릭 merge 후 행 수 불일치 "
+                f"ERROR: {folder_name} fold{i}: row count mismatch after merging metrics "
                 f"(train {len(df_train_f)}→{len(train_df)}, test {len(df_test_f)}→{len(test_df)}). "
-                'fold id가 df_metrics에 없거나 pdb_id 중복일 수 있습니다.',
+                'fold ids may be missing from df_metrics, or pdb_id may be duplicated.',
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -142,7 +138,7 @@ def run_cv_evaluation(folder_name, df_metrics):
 
     if len(fold_aucs) == 0:
         print(
-            f"ERROR: {folder_name}에서 유효한 fold 평가 결과가 없습니다.",
+            f"ERROR: {folder_name} has no valid fold evaluation results.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -161,18 +157,18 @@ if __name__ == '__main__':
     ]
     metric_dfs = [pd.read_csv(f) for f in metric_files if os.path.exists(f)]
     if not metric_dfs:
-        print('ERROR: 메트릭 CSV 파일이 없습니다.', file=sys.stderr)
+        print('ERROR: metrics CSV file not found.', file=sys.stderr)
         sys.exit(1)
     df_metrics = pd.concat(metric_dfs, ignore_index=True)
     if len(df_metrics) == 0:
-        print('ERROR: 메트릭 데이터프레임이 비어 있습니다.', file=sys.stderr)
+        print('ERROR: metrics dataframe is empty.', file=sys.stderr)
         sys.exit(1)
     print(df_metrics.shape)
 
     need = set(['pdb_id'] + FEATURE_COLS)
     miss = need - set(df_metrics.columns)
     if miss:
-        print(f'ERROR: 메트릭 CSV에 필요한 컬럼이 없습니다: {sorted(miss)}', file=sys.stderr)
+        print(f'ERROR: metrics CSV is missing required columns: {sorted(miss)}', file=sys.stderr)
         sys.exit(1)
 
     print(f"  Rows (confidence metrics only): {len(df_metrics)}")

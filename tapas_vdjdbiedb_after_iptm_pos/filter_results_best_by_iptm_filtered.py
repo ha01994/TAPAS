@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Keep rows from results_model_quality_metrics_*_best.csv whose pdb_id is in iptm_filtered_vdjdbiedb.csv (id)."""
-
 from __future__ import annotations
 
 import argparse

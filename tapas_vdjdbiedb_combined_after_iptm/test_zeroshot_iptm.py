@@ -5,7 +5,7 @@ import sys
 from sklearn.metrics import roc_auc_score
 
 
-# ── 1. score map 로드 ─────────────────────────────────────────
+# ── 1. Load score map ─────────────────────────────────────────
 def load_score_map():
     metric_files = [
     'results_vdjdbiedb_iptm_filtered_pos_best.csv',
@@ -13,11 +13,11 @@ def load_score_map():
     ]
     dfs = [pd.read_csv(f) for f in metric_files if os.path.exists(f)]
     if not dfs:
-        print("ERROR: 메트릭 CSV 파일이 없습니다.", file=sys.stderr)
+        print("ERROR: metrics CSV file not found.", file=sys.stderr)
         sys.exit(1)
     all_results = pd.concat(dfs, ignore_index=True)
     if len(all_results) == 0:
-        print("ERROR: 메트릭 데이터가 비어 있습니다.", file=sys.stderr)
+        print("ERROR: metrics data is empty.", file=sys.stderr)
         sys.exit(1)
     return dict(zip(all_results['pdb_id'].astype(str),
                     all_results['iptm_tcrpmhc']))
@@ -41,7 +41,7 @@ def macro_auc_max_fpr(y_true, y_score, pmhc, max_fpr=0.1):
     return float(np.mean(per_pmhc)) if per_pmhc else np.nan
 
 
-# ── 3. 폴드 평가 ─────────────────────────────────────────────
+# ── 3. Fold evaluation ───────────────────────────────────────
 def evaluate_folds(folder_path, score_map):
     fold_aucs, fold_aucs_01 = [], []
     print(f"\n--- Evaluating: {folder_path} ---")
@@ -50,7 +50,7 @@ def evaluate_folds(folder_path, score_map):
         test_file = os.path.join(folder_path, f'fold{i}_test.csv')
         if not os.path.exists(test_file):
             print(
-                f"ERROR: {folder_path} fold{i} test CSV가 없습니다: {test_file}",
+                f"ERROR: {folder_path} fold{i} test CSV not found: {test_file}",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -58,7 +58,7 @@ def evaluate_folds(folder_path, score_map):
         df_test_raw = pd.read_csv(test_file)
         if len(df_test_raw) == 0:
             print(
-                f"ERROR: {folder_path} fold{i} test CSV에 행이 없습니다.",
+                f"ERROR: {folder_path} fold{i} test CSV has no rows.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -75,15 +75,15 @@ def evaluate_folds(folder_path, score_map):
         if y_scores.isnull().any():
             missing = df_test.loc[y_scores.isnull(), 'id'].tolist()
             print(
-                f"ERROR: {folder_path} fold{i}: score_map에 없는 id가 "
-                f"{y_scores.isnull().sum()}개입니다 (예: {missing[:5]}).",
+                f"ERROR: {folder_path} fold{i}: ids not in score_map: "
+                f"{y_scores.isnull().sum()}items (e.g. {missing[:5]}).",
                 file=sys.stderr,
             )
             sys.exit(1)
 
         if len(y_true) == 0 or y_true.nunique() < 2:
             print(
-                f"ERROR: {folder_path} fold{i}: AUC 계산에 필요한 라벨이 부족합니다.",
+                f"ERROR: {folder_path} fold{i}: not enough labels to compute AUC.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -100,7 +100,7 @@ def evaluate_folds(folder_path, score_map):
 
     if len(fold_aucs) == 0:
         print(
-            f"ERROR: {folder_path}에서 유효한 fold 결과가 없습니다.",
+            f"ERROR: {folder_path} has no valid fold results.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -111,11 +111,11 @@ def evaluate_folds(folder_path, score_map):
     return avg_auc, fold_aucs, avg_auc01, fold_aucs_01
 
 
-# ── 4. 메인 ──────────────────────────────────────────────────
+# ── 4. Main ──────────────────────────────────────────────────
 if __name__ == "__main__":
     score_map = load_score_map()
     if len(score_map) == 0:
-        print("ERROR: score_map이 비어 있습니다.", file=sys.stderr)
+        print("ERROR: score_map is empty.", file=sys.stderr)
         sys.exit(1)
     print(f"Score map entries: {len(score_map)}")
 

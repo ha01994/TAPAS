@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import json
 import pandas as pd
-from Bio.PDB import PDBParser, MMCIFParser  # MMCIFParser 추가
+from Bio.PDB import PDBParser, MMCIFParser  # MMCIFParser added
 
 parser = argparse.ArgumentParser(description='Calculate Interface pDockQ')
 parser.add_argument('-json', type=str, required=True, help='Input json file.')
@@ -95,7 +95,7 @@ def retrieve_stats(structure, paeMat, ch_of_interest, target_chains, max_dist):
 def main():
     args = parser.parse_args()
     
-    # --- 🌟 수정된 부분: 파일 확장자에 따라 파서를 자동으로 선택하도록 변경 ---
+    # --- Updated: automatically choose parser based on file extension ---
     if args.pdb.endswith('.cif'):
         parser_struct = MMCIFParser(QUIET=True)
     else:

@@ -112,10 +112,6 @@ def cdr_plddts(model_file, alpha_chain, beta_chain):
 
 
 def calculate_iptms(json_file_path, length=5):
-    """
-    Calculates the mean of `chain_iptm` and the mean of interface TCR-pMHC iPTMs
-    using fixed chain mappings.
-    """
     try:
         # Load the JSON data from the file
         with open(json_file_path, 'r') as file:
@@ -182,10 +178,7 @@ from scipy.spatial import distance_matrix
 from Bio import PDB
 
 def calculate_pdockq_direct(model_file, receptor_chains, ligand_chains, distance_threshold=8.0):
-    """
-    원본 CIF/PDB 파일을 읽어 두 체인 그룹 간의 pDockQ를 외부 스크립트 없이 직접 계산합니다.
-    """
-    # 파서 설정 (cif와 pdb 모두 호환)
+    # Parser setup (compatible with both CIF and PDB).
     if model_file.endswith(".pdb"):
         parser = PDB.PDBParser(QUIET=True)
     else:
@@ -201,10 +194,10 @@ def calculate_pdockq_direct(model_file, receptor_chains, ligand_chains, distance
             if chain_id not in model:
                 continue
             for res in model[chain_id]:
-                # 물 분자나 헤테로 원자가 아닌 표준 아미노산만 필터링
+                # Filter to standard amino acids (exclude waters and hetero atoms).
                 if res.id[0] != ' ':
                     continue
-                # Glycine은 CA, 나머지는 CB 원자 기준 (FoldDock pDockQ 원리)
+                # Glycine uses CA; others use CB atoms (FoldDock pDockQ principle).
                 if 'CB' in res:
                     atom = res['CB']
                 elif 'CA' in res:
@@ -212,35 +205,35 @@ def calculate_pdockq_direct(model_file, receptor_chains, ligand_chains, distance
                 else:
                     continue
                 coords.append(atom.coord)
-                # AlphaFold는 B-factor 열에 pLDDT를 저장합니다.
+                # AlphaFold stores pLDDT in the B-factor column.
                 plddts.append(atom.get_bfactor()) 
         return np.array(coords), np.array(plddts)
 
-    # 1. 두 그룹의 원자 좌표와 pLDDT 추출
+    # 1. Extract atom coordinates and pLDDT for the two groups.
     rec_coords, rec_plddts = get_coords_and_plddts(receptor_chains)
     lig_coords, lig_plddts = get_coords_and_plddts(ligand_chains)
 
     if len(rec_coords) == 0 or len(lig_coords) == 0:
         return 0.0
 
-    # 2. 원자간 거리 계산 (Distance Matrix)
+    # 2. Compute inter-atomic distances (distance matrix).
     dists = distance_matrix(rec_coords, lig_coords)
 
-    # 3. Interface Contacts (8.0 Å 이하) 찾기
+    # 3. Find interface contacts (<= 8.0 Å).
     contact_indices = np.where(dists < distance_threshold)
     num_contacts = len(contact_indices[0])
 
     if num_contacts == 0:
         return 0.0
 
-    # 4. Interface Residues의 평균 pLDDT 계산
+    # 4. Compute mean pLDDT of interface residues.
     rec_contact_idx = np.unique(contact_indices[0])
     lig_contact_idx = np.unique(contact_indices[1])
 
     if_plddts = np.concatenate([rec_plddts[rec_contact_idx], lig_plddts[lig_contact_idx]])
     avg_if_plddt = np.mean(if_plddts)
 
-    # 5. pDockQ 공식 계산 (Bryant et al., 2022)
+    # 5. Compute pDockQ formula (Bryant et al., 2022).
     x = avg_if_plddt * np.log10(num_contacts)
     L = 0.724
     x0 = 152.611
@@ -252,9 +245,9 @@ def calculate_pdockq_direct(model_file, receptor_chains, ligand_chains, distance
 
 
 
-# 코드 변경
-# (1) ORIGINAL un-merged PDB model을 사용하도록
-# (2) TCR-pMHC interface 에 대해서만 계산하도록
+# Code changes
+# (1) Use the original un-merged PDB model.
+# (2) Compute only for the TCR-pMHC interface.
 
 def calculate_pdockq2_json(model_file, json_file, receptor_chains, ligand_chains):
     import subprocess
@@ -353,7 +346,7 @@ def main(model_folder, output_folder):
         for model_number in range(5):
             model_number = str(model_number)
             
-            # 중복 체크: 이미 처리했다면 건너뛰기
+            # Dedup check: skip if already processed.
             if f"{pdb_id}_model_{model_number}" in already_done:
                 print(f"Skipping: {pdb_id} model {model_number} (already processed)")
                 continue
@@ -381,7 +374,7 @@ def main(model_folder, output_folder):
             print('calculate pdockq directly from original cif')
             pmhc_chains_list = [HLA_CHAIN, B2M_CHAIN, PEP_CHAIN]
             tcr_chains_list = [TRA_CHAIN, TRB_CHAIN]                
-            # 새로운 함수로 원본 pdb_model (cif 파일)을 바로 넘깁니다
+            # Pass the original pdb_model (CIF file) directly to the new function.
             pdockq_AB = calculate_pdockq_direct(pdb_model, tcr_chains_list, pmhc_chains_list)
 
             print('calculate pdockq2 json')                

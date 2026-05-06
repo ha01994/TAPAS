@@ -1,25 +1,3 @@
-"""
-make_sites_file_v2.py
-
-results_model_quality_metrics_best.csv를 읽어서
-각 pdb_id의 best model_number에 해당하는 CIF 파일을 열고
-TCR CDR + peptide interface residues를 추출합니다.
-
-디렉토리 구조:
-  <base_dir>/
-    <pdb_id>/
-      seed-1_sample-<model_number>/
-        <pdb_id>_model.cif   (또는 여러 후보 패턴)
-
-Usage:
-  python make_sites_file_v2.py \
-      --base_dir /path/to/af3_structpred \
-      --csv results_model_quality_metrics_best.csv \
-      --output sites_all.txt \
-      --cutoff 8.0 \
-      --n_jobs 16
-"""
-
 import os
 import csv
 import glob
@@ -110,22 +88,18 @@ def get_interface_residues(atoms, query_chains, neighbor_chains, cutoff=8.0):
 
 
 # ─────────────────────────────────────────────
-# CIF 파일 경로 탐색
+# Find CIF file path
 # ─────────────────────────────────────────────
 
 def find_cif(base_dir, pdb_id, model_number):
-    """
-    여러 가능한 경로 패턴을 시도해서 CIF 파일 반환.
-    못 찾으면 None.
-    """
     sample_dir = os.path.join(base_dir, pdb_id, f"seed-1_sample-{model_number}")
 
     candidates = [
         os.path.join(sample_dir, f"{pdb_id}_model.cif"),
-        os.path.join(sample_dir, f"v0_model.cif"),          # 혹시 고정명
+        os.path.join(sample_dir, f"v0_model.cif"),          # possibly a fixed filename
         os.path.join(sample_dir, "model.cif"),
     ]
-    # glob으로 *.cif도 시도
+    # Also try globbing for *.cif
     glob_hits = glob.glob(os.path.join(sample_dir, "*.cif"))
 
     for path in candidates:
@@ -133,7 +107,7 @@ def find_cif(base_dir, pdb_id, model_number):
             return path
 
     if glob_hits:
-        return glob_hits[0]   # 첫 번째 CIF
+        return glob_hits[0]   # first CIF
 
     return None
 
@@ -186,9 +160,9 @@ def process_one(args_tuple):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base_dir',      required=True,
-                        help='af3_structpred 루트 디렉토리')
+                        help='af3_structpred root directory')
     parser.add_argument('--csv',           required=True,
-                        help='results_model_quality_metrics_best.csv 경로')
+                        help='path to results_model_quality_metrics_best.csv')
     parser.add_argument('--output',        default='sites_all.txt')
     parser.add_argument('--cutoff',        type=float, default=8.0)
     parser.add_argument('--tcr_chains',    nargs='+', default=['A', 'B'],
@@ -198,7 +172,7 @@ def main():
     parser.add_argument('--n_jobs',        type=int, default=8)
     args = parser.parse_args()
 
-    # CSV 읽기
+    # Read CSV
     records = []
     with open(args.csv) as f:
         reader = csv.DictReader(f)
