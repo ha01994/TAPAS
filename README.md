@@ -53,7 +53,7 @@ conda env create -f environment.yml
 │   ├── pae_feat_vdjdbiedb_neg.csv      # Extracted PAE features (negatives)
 │   └── results_model_quality_metrics*.csv
 │
-├── tapas_vdjdbiedb_combined_after_iptm/   # TAPAS training & evaluation
+├── tapas_vdjdbiedb_after_iptm_combined/   # TAPAS training & evaluation
 │   ├── train_tapas_conf.py             # Train: Conf features only
 │   ├── train_tapas_pae.py              # Train: PAE features only
 │   ├── train_tapas_conf_pae.py         # Train: Conf + PAE
