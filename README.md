@@ -1,75 +1,60 @@
-# TAPAS: TCR-Antigen Prediction via AlphaFold Structural confidence
+# TAPAS 
 
-> **Paper**: *Structure-Informed TCR-pMHC Binding Prediction Generalizes to Unseen Peptides*
-
-## Overview
-
-TAPAS predicts TCR–pMHC binding by combining AlphaFold3 structural confidence signals with a TabPFN classifier.
-AlphaFast is used to efficiently generate AF3 confidence metrics (ipTM, Conf) and PAE interface features for large TCR–pMHC datasets.
-
-**Feature set**: AF3 Conf + PAE interface features + ESM-2 embeddings
-
-**Training data**: VDJdb + IEDB (score=0 included), filtered to ipTM ≥ 0.7 → 2,194 positives
+Code for predicting TCR–pMHC binding using AlphaFold3 (AF3) confidence and contact metrics, summarized PAE interface features, and ESM-2 sequence embeddings.
 
 ## Environment
 
 ```bash
 conda env create -f environment.yml
+conda activate tabpfn
 ```
 
-## Pipeline
-
-1. `vdjdbiedb/`
-   - Build dataset splits (RS/SS, folds)
-   - Generate negatives
-
-2. `pos/` and `neg/` (after ipTM filtering)
-   - Compute AF3 confidence metrics (Conf)
-   - Extract PAE interface features
-   - Compute ESM-2 embeddings
-
-3. `combined/` (after ipTM filtering)
-   - Train and evaluate the TAPAS TabPFN classifier
-
-## Repository Structure
+## Layout
 
 ```
 .
-├── vdjdbiedb/                          # Dataset preparation
-│   ├── dataset_rs/                     # Random-split fold CSVs (fold0~4)
-│   ├── dataset_ss/                     # Shared-split fold CSVs (fold0~4)
-│   ├── dataset_iptm_filtered_rs/       # ipTM-filtered random-split folds
-│   └── dataset_iptm_filtered_ss/       # ipTM-filtered shared-split folds
+├── environment.yml
+├── README.md
 │
-├── tapas_vdjdbiedb_after_iptm_pos/     # Positive sample feature extraction
-│   ├── make_sites_file.py              # Generate AlphaFast sites input
-│   ├── extract_pae_matrix.py           # Extract PAE matrices from AF3 outputs
-│   ├── extract_pae_features.py         # Compute PAE interface features
-│   ├── get_esm_emb.py                  # Extract ESM-2 embeddings
+├── tapas_vdjdb_pos_af3/                 # VDJdb positives: AF3 metrics, pDockQ2, ESM, PAE extraction
+│   ├── vdjdb123.csv
 │   ├── analyze_model_quality_metrics.py
+│   ├── analyze_crystal_vs_model.py
+│   ├── pdockq2_json_interface.py
 │   ├── only_leave_ones_with_best_iptm_tcrpmhc.py
-│   ├── pae_feat_vdjdbiedb.csv          # Extracted PAE features (positives)
-│   └── results_model_quality_metrics*.csv
+│   ├── make_sites_file.py, script_make_sites.py
+│   ├── extract_pae_matrix.py, extract_pae_features.py
+│   ├── get_esm.py
+│   ├── results_model_quality_metrics*.csv
+│   └── …
 │
-├── tapas_vdjdbiedb_after_iptm_neg/     # Negative sample feature extraction
-│   ├── make_sites_file.py
-│   ├── extract_pae_matrix.py
-│   ├── extract_pae_features.py
-│   ├── analyze_model_quality_metrics_*.py
-│   ├── only_leave_ones_with_best_iptm_tcrpmhc.py
-│   ├── pae_feat_vdjdbiedb_neg.csv      # Extracted PAE features (negatives)
-│   └── results_model_quality_metrics*.csv
+├── tapas_vdjdb_neg_af3_PART1/          # negatives, part 1 
+├── tapas_vdjdb_neg_af3_PART2/          # negatives, part 2
 │
-├── tapas_vdjdbiedb_after_iptm_combined/   # TAPAS training & evaluation
-│   ├── train_tapas_conf.py             # Train: Conf features only
-│   ├── train_tapas_pae.py              # Train: PAE features only
-│   ├── train_tapas_conf_pae.py         # Train: Conf + PAE
-│   ├── train_tapas_esm_conf_pae.py     # Train: Conf + PAE + ESM-2
-│   ├── test_zeroshot_iptm.py           # Zero-shot ipTM evaluation
-│   ├── test_zeroshot_individual.py     # Zero-shot per-feature evaluation
-│   └── results_auc/                    # AUC result CSVs per feature set & split
-│
-├── environment.yml                     # Conda environment
-└── README.md
+└── train_tapas/
+    ├── dataset_rs/                      # random split, fold0–4
+    ├── dataset_ss/                      # shared split, fold0–4
+    ├── pae_feat_af3_vdjdb.csv
+    ├── pae_feat_af3_vdjdb_neg_part1.csv
+    ├── pae_feat_af3_vdjdb_neg_part2.csv
+    ├── results_model_quality_metrics_pos_best.csv
+    ├── results_model_quality_metrics_neg1_best.csv
+    ├── results_model_quality_metrics_neg2_best.csv
+    ├── train_tapas_esm_conf_pae.py          
+    ├── test_zeroshot_all.py
+    └── results_auc/                         
 ```
+
+## Suggested workflow
+
+1. In each positive / negative folder, build `results_model_quality_metrics.csv` from AF3 outputs (`analyze_model_quality_metrics.py`). If you have multiple decoys per `pdb_id`, run `only_leave_ones_with_best_iptm_tcrpmhc.py` to write `*_best.csv`. That step selects the best-scoring structure per id. 
+
+2. **PAE features (reference code only in `tapas_vdjdb_pos_af3/`)**: after you have `results_model_quality_metrics_best.csv` and a sites file for interface residues (see `make_sites_file.py` / `script_make_sites.py`), run `extract_pae_matrix.py` to slice AF3 full PAE JSON into per-complex `*_interface_pae.npy` under `pae_matrix_af3_vdjdb/` (paths such as `AF_OUTPUT_DIR`, `BEST_CSV`, `SITES_TXT`, and `OUT_DIR` are set at the top of that script—point them at your AF3 output tree). Then run `extract_pae_features.py` to aggregate those `.npy` files into `pae_feat_af3_vdjdb.csv` (adjust `pae_directory` in the script if needed). Copy the resulting `pae_feat_*.csv` files into `train_tapas/` next to the training scripts (negative parts use the same column schema if you generate them with an equivalent pipeline).
+
+3. For ESM training, run `tapas_vdjdb_pos_af3/get_esm.py` to produce `esm_embeddings_map_vdjdb.npy`, then copy or symlink it into `train_tapas/`. 
+
+4. From `train_tapas/`, run `python train_tapas_esm_conf_pae.py`.
+
+5. Use `test_zeroshot_all.py` for single-score zero-shot summaries.
+
 
