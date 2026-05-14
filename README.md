@@ -16,7 +16,7 @@ conda activate tabpfn
 ├── environment.yml
 ├── README.md
 │
-├── tapas_vdjdb_pos_af3/                 # VDJdb positives: AF3 metrics, pDockQ2, ESM, PAE extraction
+├── tapas_vdjdb_pos_af3/                 # VDJdb positives
 │   ├── vdjdb123.csv
 │   ├── analyze_model_quality_metrics.py
 │   ├── analyze_crystal_vs_model.py
@@ -60,5 +60,6 @@ conda activate tabpfn
 ## Acknowledgements
 
 AF3 confidence metric extraction in this repository drew heavily on structure from [AF3TCRpMHC](https://github.com/Alexasparis/AF3TCRpMHC). 
+
 Reference: Ascunce-París *et al.*, *A Unified Framework for TCR-pMHC Structural Model Assessment*, [doi:10.1101/2025.10.09.681411](https://doi.org/10.1101/2025.10.09.681411).
 
