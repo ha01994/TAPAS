@@ -57,4 +57,8 @@ conda activate tabpfn
 
 5. Use `test_zeroshot_all.py` for single-score zero-shot summaries.
 
+## Acknowledgements
+
+AF3 confidence metric extraction in this repository drew heavily on structure from [AF3TCRpMHC](https://github.com/Alexasparis/AF3TCRpMHC). 
+Reference: Ascunce-París *et al.*, *A Unified Framework for TCR-pMHC Structural Model Assessment*, [doi:10.1101/2025.10.09.681411](https://doi.org/10.1101/2025.10.09.681411).
 
