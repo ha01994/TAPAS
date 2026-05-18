@@ -53,21 +53,19 @@ python setup.py install
 ## Suggested workflow
 
 1. **AF3 Confidence Metrics**:<br>
-    1) In each positive / negative folder, build `results_model_quality_metrics.csv` from AF3 outputs (`analyze_model_quality_metrics.py`).<br>
-    2) Run `only_leave_ones_with_best_iptm_tcrpmhc.py` to write `results_model_quality_metrics_best.csv`. That step selects the best-scoring structure per id.<br>
-    3) Copy it to `train_tapas/`.<br>
+- In each positive / negative folder, build `results_model_quality_metrics.csv` from AF3 outputs (`analyze_model_quality_metrics.py`).<br>
+- Run `only_leave_ones_with_best_iptm_tcrpmhc.py` to write `results_model_quality_metrics_best.csv`. That step selects the best-scoring structure per id. Copy it to `train_tapas/`.<br>
 
 2. **PAE features (reference code only in `tapas_vdjdb_pos_af3/`)**:<br>
-    1) Run `extract_pae_matrix.py` to slice AF3 full PAE JSON into per-complex `*_interface_pae.npy` under `pae_matrix_af3_vdjdb/`.<br>
-    2) Then run `extract_pae_features.py` to aggregate those `.npy` files into `pae_feat_af3_vdjdb.csv`.<br>
-    3) Copy it to `train_tapas/`.<br>
+- Run `extract_pae_matrix.py` to generate `*_interface_pae.npy` under `pae_matrix_af3_vdjdb/`.<br>
+- Then run `extract_pae_features.py` to generate `pae_feat_af3_vdjdb.csv`, then copy it to `train_tapas/`.<br>
     
-3. **ESM-2 Features**:<br>
-    1) For ESM inference, run `tapas_vdjdb_pos_af3/get_esm.py` to produce `esm_embeddings_map_vdjdb.npy`, then copy it to `train_tapas/`.<br>
+3. **ESM-2 Features (reference code only in `tapas_vdjdb_pos_af3/`)**:<br>
+- Run `get_esm.py` to produce `esm_embeddings_map_vdjdb.npy`, then copy it to `train_tapas/`.<br>
 
 4. **Inference**:<br>
-    1) From `test_tapas/`, run `python test_tapas.py`.<br>
-    2) Use `test_zeroshot_all.py` for single-score zero-shot summaries.<br>
+- From `test_tapas/`, run `python test_tapas.py`.<br>
+- Use `test_zeroshot_all.py` for single-score zero-shot summaries.<br>
 
 
 ## Acknowledgements
