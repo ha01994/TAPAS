@@ -18,36 +18,24 @@ python setup.py install
 
 ```
 .
-├── environment.yml
-├── README.md
-│
-├── tapas_vdjdb_pos_af3/                 # VDJdb positives
+├── tapas_vdjdb_pos_af3/          # VDJdb positives
 │   ├── vdjdb123.csv
 │   ├── analyze_model_quality_metrics.py
-│   ├── analyze_crystal_vs_model.py
-│   ├── pdockq2_json_interface.py
 │   ├── only_leave_ones_with_best_iptm_tcrpmhc.py
 │   ├── make_sites_file.py, script_make_sites.py
 │   ├── extract_pae_matrix.py, extract_pae_features.py
 │   ├── get_esm.py
-│   ├── results_model_quality_metrics*.csv
 │   └── …
 │
-├── tapas_vdjdb_neg_af3_PART1/          # negatives, part 1 
-├── tapas_vdjdb_neg_af3_PART2/          # negatives, part 2
+├── tapas_vdjdb_neg_af3_PART1/    # negatives, part 1 
+├── tapas_vdjdb_neg_af3_PART2/    # negatives, part 2
 │
 └── test_tapas/
-    ├── dataset_rs/                      # random split, fold0–4
-    ├── dataset_ss/                      # shared split, fold0–4
-    ├── pae_feat_af3_vdjdb.csv
-    ├── pae_feat_af3_vdjdb_neg_part1.csv
-    ├── pae_feat_af3_vdjdb_neg_part2.csv
-    ├── results_model_quality_metrics_pos_best.csv
-    ├── results_model_quality_metrics_neg1_best.csv
-    ├── results_model_quality_metrics_neg2_best.csv
+    ├── dataset_rs/               # random split, fold0–4
+    ├── dataset_ss/               # shared split, fold0–4
     ├── test_tapas.py          
     ├── test_zeroshot_all.py
-    └── results_auc/                         
+    └── …
 ```
 
 ## Suggested workflow
@@ -56,7 +44,7 @@ python setup.py install
     - In each positive / negative folder, build `results_model_quality_metrics.csv` from AF3 outputs (`analyze_model_quality_metrics.py`).<br>
     - Run `only_leave_ones_with_best_iptm_tcrpmhc.py` to write `results_model_quality_metrics_best.csv`. That step selects the best-scoring structure per id. Copy it to `train_tapas/`.<br>
 
-2. **PAE features (reference code only in tapas_vdjdb_pos_af3)**:<br>
+2. **PAE Features (reference code only in tapas_vdjdb_pos_af3)**:<br>
     - Run `extract_pae_matrix.py` to generate `*_interface_pae.npy` under `pae_matrix_af3_vdjdb/`.<br>
     - Then run `extract_pae_features.py` to generate `pae_feat_af3_vdjdb.csv`, then copy it to `train_tapas/`.<br>
     
