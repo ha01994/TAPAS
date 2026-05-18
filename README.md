@@ -7,6 +7,11 @@ Code for predicting TCR–pMHC binding using AlphaFold3 (AF3) confidence and con
 ```bash
 conda env create -f environment.yml
 conda activate tabpfn
+
+# Install ANARCI
+git clone https://github.com/oxpig/ANARCI.git
+cd ANARCI
+python setup.py install
 ```
 
 ## Layout
