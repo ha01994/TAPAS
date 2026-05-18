@@ -3,6 +3,15 @@ import glob
 import numpy as np
 import pandas as pd
 
+FEATURE_PRECISION = 8
+
+
+def round_feature(value):
+    if value is None:
+        return None
+    return round(float(value), FEATURE_PRECISION)
+
+
 def extract_pae_features(pae_dir):
     # Collect all interface PAE .npy files under pae_dir
     file_pattern = os.path.join(pae_dir, '*_interface_pae.npy')
@@ -59,19 +68,17 @@ def extract_pae_features(pae_dir):
             # Mean |PAE_ij - PAE_ji|
             asymmetry = np.mean(np.abs(pae_matrix - pae_matrix.T))
 
-        # One row of scalar features
         features = {
             'sample_id': sample_id,
-            'pae_mean': mean_pae,
-            'pae_min': min_pae,
-            'pae_max': max_pae,
-            'pae_std': std_pae,
-            'pae_median': median_pae,
-            'pae_p10': p10_pae,
-            'pae_p90': p90_pae,
-            'pae_frac_lt_5': frac_less_5,
-            'pae_frac_gt_15': frac_greater_15,
-            'pae_asymmetry': asymmetry  # non-zero only for square interface matrices
+            'pae_mean': round_feature(mean_pae),            
+            'pae_max': round_feature(max_pae),
+            'pae_std': round_feature(std_pae),
+            'pae_median': round_feature(median_pae),
+            'pae_p10': round_feature(p10_pae),
+            'pae_p90': round_feature(p90_pae),
+            'pae_frac_lt_5': round_feature(frac_less_5),
+            'pae_frac_gt_15': round_feature(frac_greater_15),
+            'pae_asymmetry': round_feature(asymmetry),
         }
         
         features_list.append(features)
