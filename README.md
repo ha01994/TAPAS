@@ -36,7 +36,7 @@ python setup.py install
 ├── tapas_vdjdb_neg_af3_PART1/          # negatives, part 1 
 ├── tapas_vdjdb_neg_af3_PART2/          # negatives, part 2
 │
-└── train_tapas/
+└── test_tapas/
     ├── dataset_rs/                      # random split, fold0–4
     ├── dataset_ss/                      # shared split, fold0–4
     ├── pae_feat_af3_vdjdb.csv
@@ -45,22 +45,30 @@ python setup.py install
     ├── results_model_quality_metrics_pos_best.csv
     ├── results_model_quality_metrics_neg1_best.csv
     ├── results_model_quality_metrics_neg2_best.csv
-    ├── train_tapas_esm_conf_pae.py          
+    ├── test_tapas.py          
     ├── test_zeroshot_all.py
     └── results_auc/                         
 ```
 
 ## Suggested workflow
 
-1. **AF3 Confidence Metrics**: In each positive / negative folder, build `results_model_quality_metrics.csv` from AF3 outputs (`analyze_model_quality_metrics.py`). If you have multiple decoys per `pdb_id`, run `only_leave_ones_with_best_iptm_tcrpmhc.py` to write `*_best.csv`. That step selects the best-scoring structure per id. 
+1. **AF3 Confidence Metrics**:<br>
+    1) In each positive / negative folder, build `results_model_quality_metrics.csv` from AF3 outputs (`analyze_model_quality_metrics.py`).<br>
+    2) Run `only_leave_ones_with_best_iptm_tcrpmhc.py` to write `results_model_quality_metrics_best.csv`. That step selects the best-scoring structure per id.<br>
+    3) Copy it to `train_tapas/`.<br>
 
-2. **PAE features (reference code only in `tapas_vdjdb_pos_af3/`)**: after you have `results_model_quality_metrics_best.csv` and a sites file for interface residues (see `make_sites_file.py` / `script_make_sites.py`), run `extract_pae_matrix.py` to slice AF3 full PAE JSON into per-complex `*_interface_pae.npy` under `pae_matrix_af3_vdjdb/` (paths such as `AF_OUTPUT_DIR`, `BEST_CSV`, `SITES_TXT`, and `OUT_DIR` are set at the top of that script—point them at your AF3 output tree). Then run `extract_pae_features.py` to aggregate those `.npy` files into `pae_feat_af3_vdjdb.csv` (adjust `pae_directory` in the script if needed). Copy the resulting `pae_feat_*.csv` files into `train_tapas/` next to the training scripts (negative parts use the same column schema if you generate them with an equivalent pipeline).
+2. **PAE features (reference code only in `tapas_vdjdb_pos_af3/`)**:<br>
+    1) Run `extract_pae_matrix.py` to slice AF3 full PAE JSON into per-complex `*_interface_pae.npy` under `pae_matrix_af3_vdjdb/`.<br>
+    2) Then run `extract_pae_features.py` to aggregate those `.npy` files into `pae_feat_af3_vdjdb.csv`.<br>
+    3) Copy it to `train_tapas/`.<br>
+    
+3. **ESM-2 Features**:<br>
+    1) For ESM inference, run `tapas_vdjdb_pos_af3/get_esm.py` to produce `esm_embeddings_map_vdjdb.npy`, then copy it to `train_tapas/`.<br>
 
-3. **ESM-2 Features**: For ESM inference, run `tapas_vdjdb_pos_af3/get_esm.py` to produce `esm_embeddings_map_vdjdb.npy`, then copy or symlink it into `train_tapas/`. 
+4. **Inference**:<br>
+    1) From `test_tapas/`, run `python test_tapas.py`.<br>
+    2) Use `test_zeroshot_all.py` for single-score zero-shot summaries.<br>
 
-4. From `train_tapas/`, run `python train_tapas_esm_conf_pae.py`.
-
-5. Use `test_zeroshot_all.py` for single-score zero-shot summaries.
 
 ## Acknowledgements
 
