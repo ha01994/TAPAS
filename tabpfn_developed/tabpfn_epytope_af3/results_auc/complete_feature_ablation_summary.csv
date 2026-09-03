@@ -1,0 +1,7 @@
+dataset,feature_set,score_stage,aggregation,n_models,n_train_per_model,n_test,n_peptides,n_features,macro_auc,macro_auc_0.1
+ePytope-TCR,ESM-2 only,raw,mean_probability_over_10_models,10,4298,3560,8,288,0.54150075,0.50127160
+ePytope-TCR,Confidence only,raw,mean_probability_over_10_models,10,4298,3560,8,4,0.60344570,0.54335869
+ePytope-TCR,Geometry only,raw,mean_probability_over_10_models,10,4298,3560,8,11,0.61050860,0.53716010
+ePytope-TCR,ESM-2 + confidence,raw,mean_probability_over_10_models,10,4298,3560,8,292,0.60713076,0.56079128
+ePytope-TCR,ESM-2 + geometry,raw,mean_probability_over_10_models,10,4298,3560,8,299,0.59643617,0.54309319
+ePytope-TCR,Full TAPAS,raw,mean_probability_over_10_models,10,4298,3560,8,303,0.60193721,0.56181283

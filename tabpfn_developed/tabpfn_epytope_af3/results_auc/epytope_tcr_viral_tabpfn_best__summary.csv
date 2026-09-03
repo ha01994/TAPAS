@@ -1,0 +1,2 @@
+method,subset,training_dataset,n_train,n_test,positive,negative,n_peptides,n_features,macro_auc,macro_auc_0.1
+TAPAS (raw),extra_interface_quality_geometry_cdr3_contacts_pose_esm,VDJDB RS fold0 train+val+test,4298,3560,445,3115,8,303,0.5931,0.5607

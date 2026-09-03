@@ -1,0 +1,3 @@
+subset,split,mean_macro_auc,mean_macro_auc_0.1,n_base_features,n_geometry_features,n_esm_features,n_total_features
+extra_interface_quality_geometry_cdr3_contacts_pose_esm,dataset_rs,0.8667520468914864,0.8984780724944728,4,11,288,303
+extra_interface_quality_geometry_cdr3_contacts_pose_esm,dataset_ss,0.7748086771461073,0.8425331451453634,4,11,288,303

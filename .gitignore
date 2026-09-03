@@ -5,3 +5,16 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 
+# Generated embeddings, predictions, and local AF3 output trees
+*.npy
+af3_outputs/
+af3_confidence/vdjdb/
+af3_confidence/epytope_tcr_viral/
+af3_confidence/immrep25/
+af3_geometry/vdjdb/
+af3_geometry/epytope_tcr_viral/
+af3_geometry/immrep25/
+**/results_auc/*predictions*.csv
+**/results_auc/*clusters*.csv
+**/summary_vdjdb.csv
+**/summary_immrep25.csv

@@ -1,0 +1,2 @@
+method,score_stage,aggregation,training_models,n_models,n_train_per_model,n_test,n_peptides,n_features,macro_auc,macro_auc_0.1
+TAPAS 10-model probability ensemble,raw,pairwise_mean_probability,RS folds 0-4 + SS folds 0-4; train+val+test,10,4298,3560,8,303,0.6019,0.5618

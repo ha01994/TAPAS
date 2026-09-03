@@ -129,6 +129,7 @@ dependencies:
       - tabpfn-common-utils==0.2.19
       - threadpoolctl==3.6.0
       - torch==2.8.0
+      - tcrdist3==0.3
       - tqdm==4.67.3
       - triton==3.4.0
       - typer==0.23.2
@@ -137,4 +138,3 @@ dependencies:
       - tzdata==2026.1
       - urllib3==2.6.3
       - zipp==3.23.0
-prefix: /home/ubuntu/miniconda3/envs/tabpfn

@@ -1,0 +1,7 @@
+dataset,feature_set,aggregation,n_models,n_train_per_model,n_test,n_peptides,n_features,raw_macro_auc,raw_macro_auc_0.1,normalized_macro_auc,normalized_macro_auc_0.1,postprocessed_macro_auc,postprocessed_macro_auc_0.1
+IMMREP25,ESM-2 only,mean_probability_over_10_models,10,4298,10000,20,288,0.50723333,0.50092398,0.52244222,0.50826901,0.52339556,0.50948587
+IMMREP25,Confidence only,mean_probability_over_10_models,10,4298,10000,20,4,0.62133889,0.57566082,0.66555111,0.58373099,0.68021778,0.59108772
+IMMREP25,Geometry only,mean_probability_over_10_models,10,4298,10000,20,11,0.61474667,0.52729825,0.64041333,0.54495906,0.65358667,0.55935932
+IMMREP25,ESM-2 + confidence,mean_probability_over_10_models,10,4298,10000,20,292,0.63174889,0.58224561,0.68663111,0.59247953,0.69614000,0.59791813
+IMMREP25,ESM-2 + geometry,mean_probability_over_10_models,10,4298,10000,20,299,0.62389111,0.53690058,0.66518667,0.56149708,0.67548444,0.57387719
+IMMREP25,Full TAPAS,mean_probability_over_10_models,10,4298,10000,20,303,0.63896889,0.58470175,0.69666667,0.59390643,0.70620667,0.60201754
