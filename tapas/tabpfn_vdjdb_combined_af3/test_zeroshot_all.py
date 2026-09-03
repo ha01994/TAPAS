@@ -12,7 +12,7 @@ from sklearn.metrics import roc_auc_score
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEVELOPED_DIR = os.path.dirname(SCRIPT_DIR)
-DATASET_ROOT = SCRIPT_DIR
+DATASET_ROOT = os.path.join(SCRIPT_DIR, "data")
 REPO_ROOT = os.path.dirname(DEVELOPED_DIR)
 METRIC_FILE = os.path.join(
     REPO_ROOT, "af3_confidence", "vdjdb", "model_quality_metrics_best_af3_ranking_score.csv"

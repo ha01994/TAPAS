@@ -8,8 +8,9 @@ from anarci import anarci
 from tqdm import tqdm
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-IMMREP25_TSV = SCRIPT_DIR / "immrep25.tsv"
-IMMREP25_PAIRS_CSV = SCRIPT_DIR / "immrep25_pairs.csv"
+DATA_DIR = SCRIPT_DIR / "data"
+IMMREP25_TSV = DATA_DIR / "immrep25.tsv"
+IMMREP25_PAIRS_CSV = DATA_DIR / "immrep25_pairs.csv"
 OUTPUT_FILE = SCRIPT_DIR / "esm_embeddings_map.npy"
 MODEL_NAME = "esm2_t33_650M_UR50D"
 DEVICE     = "cuda:0"

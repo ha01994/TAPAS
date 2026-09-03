@@ -13,9 +13,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_OUT_DIR = SCRIPT_DIR / "vdjdb"
 DEFAULT_STRUCTURE_ROOTS = [
-    REPO_ROOT / "af3_outputs" / "vdjdb_positive",
-    REPO_ROOT / "af3_outputs" / "vdjdb_negative_part1",
-    REPO_ROOT / "af3_outputs" / "vdjdb_negative_part2",
+    REPO_ROOT / "af3_outputs" / "vdjdb",
 ]
 
 

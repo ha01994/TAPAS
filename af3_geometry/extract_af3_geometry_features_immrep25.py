@@ -38,14 +38,14 @@ PEP = "E"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-IMMREP25_DIR = REPO_ROOT / "tabpfn_developed" / "tabpfn_immrep25_af3"
+IMMREP25_DIR = REPO_ROOT / "tapas" / "tabpfn_immrep25_af3"
 DEFAULT_CONDITIONS = ["baseline_default"]
 DEFAULT_OUTPUT_DIRS = [
     REPO_ROOT / "af3_outputs" / "immrep25",
 ]
-DEFAULT_PAIR = IMMREP25_DIR / "immrep25_pairs.csv"
-DEFAULT_TCR_LOOKUP = IMMREP25_DIR / "immrep25_tcrs.csv"
-DEFAULT_MHC_LOOKUP = IMMREP25_DIR / "mhc_i_protein_seq.csv"
+DEFAULT_PAIR = IMMREP25_DIR / "data" / "immrep25_pairs.csv"
+DEFAULT_TCR_LOOKUP = IMMREP25_DIR / "data" / "immrep25_tcrs.csv"
+DEFAULT_MHC_LOOKUP = IMMREP25_DIR / "data" / "mhc_i_protein_seq.csv"
 DEFAULT_OUT_DIR = SCRIPT_DIR / "immrep25"
 DEFAULT_CONFIDENCE_MEDIAN = (
     REPO_ROOT / "af3_confidence" / "immrep25"

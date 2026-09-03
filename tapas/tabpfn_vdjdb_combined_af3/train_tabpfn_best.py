@@ -29,7 +29,7 @@ warnings.filterwarnings("ignore")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SOURCE_DIR = BASE_DIR
 DEVELOPED_DIR = os.path.dirname(BASE_DIR)
-DATASET_ROOT = BASE_DIR
+DATASET_ROOT = os.path.join(BASE_DIR, "data")
 REPO_ROOT = os.path.dirname(DEVELOPED_DIR)
 DEVICE = "cuda:0"
 SEED = 42

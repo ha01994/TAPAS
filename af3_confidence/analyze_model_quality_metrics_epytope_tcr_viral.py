@@ -14,10 +14,10 @@ import analyze_model_quality_metrics_common as common
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-VIRAL_DIR = REPO_ROOT / "tabpfn_developed" / "tabpfn_epytope_af3"
+VIRAL_DIR = REPO_ROOT / "tapas" / "tabpfn_epytope_af3"
 DEFAULT_OUT_DIR = SCRIPT_DIR / "epytope_tcr_viral"
 DEFAULT_STRUCTURE_ROOTS = [REPO_ROOT / "af3_outputs" / "epytope_tcr_viral"]
-DEFAULT_MANIFEST = VIRAL_DIR / "af3_inputs" / "manifest.csv"
+DEFAULT_MANIFEST = VIRAL_DIR / "data" / "manifest.csv"
 OUTPUT_PAIR_SUFFIX = "_structure"
 
 warnings.filterwarnings("ignore", message="Mean of empty slice")

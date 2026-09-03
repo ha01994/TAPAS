@@ -12,7 +12,7 @@ from sklearn.metrics import roc_auc_score
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[1]
-MANIFEST_CSV = SCRIPT_DIR / "af3_inputs" / "manifest.csv"
+MANIFEST_CSV = SCRIPT_DIR / "data" / "manifest.csv"
 CONFIDENCE_CSV = (
     REPO_ROOT / "af3_confidence" / "epytope_tcr_viral"
     / "model_quality_metrics_best_af3_ranking_score.csv"

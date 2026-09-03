@@ -14,7 +14,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 METRIC_FILE = os.path.join(
     REPO_ROOT, "af3_confidence", "immrep25", "model_quality_metrics_best_af3_ranking_score.csv"
 )
-IMMREP25_PAIRS_CSV = os.path.join(SCRIPT_DIR, "immrep25_pairs.csv")
+IMMREP25_PAIRS_CSV = os.path.join(SCRIPT_DIR, "data", "immrep25_pairs.csv")
 SUMMARY_CSV = os.path.join(SCRIPT_DIR, "summary_immrep25.csv")
 
 SCORE_COLS = [

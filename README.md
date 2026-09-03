@@ -34,18 +34,26 @@ the highest AF3 `ranking_score` among its five diffusion samples.
 │   ├── extract_af3_geometry_features_vdjdb.py
 │   ├── extract_af3_geometry_features_epytope_tcr_viral.py
 │   └── extract_af3_geometry_features_immrep25.py
-└── tabpfn_developed/
+└── tapas/
     ├── tabpfn_vdjdb_combined_af3/
-    │   ├── dataset_rs/                     # VDJdb random split, folds 0–4
-    │   ├── dataset_ss/                     # VDJdb strict split, folds 0–4
-    │   └── af3_inputs/                     # VDJdb source/lookup tables
+    │   └── data/
+    │       ├── dataset_rs/                 # VDJdb random split, folds 0–4
+    │       ├── dataset_ss/                 # VDJdb strict split, folds 0–4
+    │       ├── parsed_data_final.csv
+    │       ├── negatives.csv
+    │       ├── dic_full_vavb.csv
+    │       └── mhc_i_protein_seq.csv
     ├── tabpfn_epytope_af3/
-    │   ├── original_data/viral_8peptide.csv
-    │   └── af3_inputs/                     # 3,560-pair manifest and TCRs
+    │   └── data/
+    │       ├── viral_8peptide.csv
+    │       ├── manifest.csv                # 3,560-pair manifest
+    │       └── tcr_sequences.csv
     └── tabpfn_immrep25_af3/
-        ├── immrep25.tsv                    # original benchmark table
-        ├── immrep25_pairs.csv
-        └── immrep25_tcrs.csv
+        └── data/
+            ├── immrep25.tsv                # original benchmark table
+            ├── immrep25_pairs.csv
+            ├── immrep25_tcrs.csv
+            └── mhc_i_protein_seq.csv
 ```
 
 Precomputed AF3 confidence and geometry feature tables are not distributed.
@@ -56,10 +64,10 @@ The ePytope benchmark in this repository contains exactly 3,560 pairs from 445
 TCRs and these eight viral peptides:
 `AYAQKIFKI`, `CTELKLSDY`, `FPQSAPHGV`, `KCYGVSPTK`, `LTDEMIAQY`,
 `NYNYLYRLF`, `SPRRARSVA`, and `TYGPVFMCL`.
-`original_data/viral_8peptide.csv` contains the corresponding 445 cognate TCR
-rows in the source ePytope table format. ImmRep25 retains its original
-10,000-row `immrep25.tsv`; the pair and TCR CSVs are deterministic downstream
-tables used by feature extraction and evaluation.
+`tapas/tabpfn_epytope_af3/data/viral_8peptide.csv` contains the
+corresponding 445 cognate TCR rows in the source ePytope table format. ImmRep25
+retains its original 10,000-row `data/immrep25.tsv`; the pair and TCR CSVs are
+deterministic downstream tables used by feature extraction and evaluation.
 
 ## Environment
 
@@ -87,9 +95,7 @@ By default, feature extraction searches under the following untracked paths:
 
 ```text
 af3_outputs/
-├── vdjdb_positive/
-├── vdjdb_negative_part1/
-├── vdjdb_negative_part2/
+├── vdjdb/
 ├── epytope_tcr_viral/
 └── immrep25/
 ```
@@ -98,8 +104,9 @@ Each root must contain one AF3 job directory per pair. Each job directory must
 contain the standard AF3 sample directories and their `model.cif`,
 `summary_confidences.json`, and `confidences.json` files. The scripts also read
 AF3 `ranking_score` from the job's ranking CSV or sample summary JSON.
-Alternative roots can be supplied with repeated `--structure-root` for
-confidence extraction and repeated `--output-dir` for geometry extraction.
+If AF3 jobs are distributed across multiple directories, supply each root by
+repeating `--structure-root` for confidence extraction or `--output-dir` for
+geometry extraction.
 
 ## Reproducing the feature tables
 
@@ -114,12 +121,15 @@ also uses the generated median-sample selection table.
 python af3_confidence/analyze_model_quality_metrics_vdjdb.py
 python af3_geometry/extract_af3_geometry_features_vdjdb.py
 
-cd tabpfn_developed/tabpfn_vdjdb_combined_af3
+cd tapas/tabpfn_vdjdb_combined_af3
 python get_esm.py
 ```
 
-The input metadata used by the VDJdb geometry extractor is in
-`tabpfn_developed/tabpfn_vdjdb_combined_af3/af3_inputs/`.
+The VDJdb geometry and ESM scripts read their source and lookup tables from
+`tapas/tabpfn_vdjdb_combined_af3/data/`. `get_esm.py` reconstructs
+the required peptide and CDR table directly from `parsed_data_final.csv`,
+`negatives.csv`, and `dic_full_vavb.csv`; no `vdjdb123.csv` intermediate is
+required.
 
 #### ePytope viral set
 
@@ -127,7 +137,7 @@ The input metadata used by the VDJdb geometry extractor is in
 python af3_confidence/analyze_model_quality_metrics_epytope_tcr_viral.py
 python af3_geometry/extract_af3_geometry_features_epytope_tcr_viral.py
 
-cd tabpfn_developed/tabpfn_epytope_af3
+cd tapas/tabpfn_epytope_af3
 python get_esm.py --device cuda:0
 ```
 
@@ -141,13 +151,13 @@ that intermediate table is needed.
 python af3_confidence/analyze_model_quality_metrics_immrep25.py
 python af3_geometry/extract_af3_geometry_features_immrep25.py
 
-cd tabpfn_developed/tabpfn_immrep25_af3
+cd tapas/tabpfn_immrep25_af3
 python get_esm.py
 ```
 
 The ImmRep25 ESM script reconstructs IMGT CDR1/2/3 features directly from
-`immrep25.tsv` and takes pair IDs and labels from `immrep25_pairs.csv`; no
-VDJdb-like intermediate CSV is required.
+`data/immrep25.tsv` and takes pair IDs and labels from
+`data/immrep25_pairs.csv`; no VDJdb-like intermediate CSV is required.
 
 ## Training and evaluation
 
@@ -157,7 +167,7 @@ maps, run the dataset-specific scripts from their own directories.
 #### VDJdb random and strict splits
 
 ```bash
-cd tabpfn_developed/tabpfn_vdjdb_combined_af3
+cd tapas/tabpfn_vdjdb_combined_af3
 python train_tabpfn_best.py
 ```
 
@@ -166,7 +176,7 @@ python train_tabpfn_best.py
 #### ePytope viral benchmark
 
 ```bash
-cd tabpfn_developed/tabpfn_epytope_af3
+cd tapas/tabpfn_epytope_af3
 python train_tabpfn_ensemble.py
 ```
 
@@ -176,7 +186,7 @@ and five SS full-fold datasets.
 #### ImmRep25
 
 ```bash
-cd tabpfn_developed/tabpfn_immrep25_af3
+cd tapas/tabpfn_immrep25_af3
 python train_tabpfn_ensemble.py
 ```
 

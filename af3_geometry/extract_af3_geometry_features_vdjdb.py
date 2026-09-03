@@ -38,17 +38,15 @@ PEP = "E"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-VDJDB_DIR = REPO_ROOT / "tabpfn_developed" / "tabpfn_vdjdb_combined_af3"
+VDJDB_DIR = REPO_ROOT / "tapas" / "tabpfn_vdjdb_combined_af3"
 DEFAULT_CONDITIONS = ["baseline_default"]
 DEFAULT_OUTPUT_DIRS = [
-    REPO_ROOT / "af3_outputs" / "vdjdb_positive",
-    REPO_ROOT / "af3_outputs" / "vdjdb_negative_part1",
-    REPO_ROOT / "af3_outputs" / "vdjdb_negative_part2",
+    REPO_ROOT / "af3_outputs" / "vdjdb",
 ]
-DEFAULT_POSITIVE_RAW = VDJDB_DIR / "af3_inputs" / "parsed_data_final.csv"
-DEFAULT_NEGATIVE_RAW = VDJDB_DIR / "af3_inputs" / "negatives.csv"
-DEFAULT_TCR_LOOKUP = VDJDB_DIR / "af3_inputs" / "dic_full_vavb.csv"
-DEFAULT_MHC_LOOKUP = VDJDB_DIR / "af3_inputs" / "mhc_i_protein_seq.csv"
+DEFAULT_POSITIVE_RAW = VDJDB_DIR / "data" / "parsed_data_final.csv"
+DEFAULT_NEGATIVE_RAW = VDJDB_DIR / "data" / "negatives.csv"
+DEFAULT_TCR_LOOKUP = VDJDB_DIR / "data" / "dic_full_vavb.csv"
+DEFAULT_MHC_LOOKUP = VDJDB_DIR / "data" / "mhc_i_protein_seq.csv"
 DEFAULT_OUT_DIR = SCRIPT_DIR / "vdjdb"
 DEFAULT_CONFIDENCE_MEDIAN = (
     REPO_ROOT / "af3_confidence" / "vdjdb"

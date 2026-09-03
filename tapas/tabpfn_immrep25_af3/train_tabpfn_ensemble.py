@@ -23,7 +23,7 @@ import train_tabpfn_best as best
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATASET_ROOT = SCRIPT_DIR.parent / "tabpfn_vdjdb_combined_af3"
+DATASET_ROOT = SCRIPT_DIR.parent / "tabpfn_vdjdb_combined_af3" / "data"
 RESULTS_DIR = SCRIPT_DIR / "results_auc"
 PREDICTIONS_CSV = RESULTS_DIR / "immrep25_tabpfn_ensemble_10model__predictions.csv"
 PER_PEPTIDE_CSV = (

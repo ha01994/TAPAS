@@ -13,10 +13,10 @@ import extract_af3_geometry_features_immrep25 as extractor
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-VIRAL_DIR = REPO_ROOT / "tabpfn_developed" / "tabpfn_epytope_af3"
+VIRAL_DIR = REPO_ROOT / "tapas" / "tabpfn_epytope_af3"
 DEFAULT_OUTPUT_DIRS = [REPO_ROOT / "af3_outputs" / "epytope_tcr_viral"]
-DEFAULT_MANIFEST = VIRAL_DIR / "af3_inputs" / "manifest.csv"
-DEFAULT_TCR_LOOKUP = VIRAL_DIR / "af3_inputs" / "tcr_sequences.csv"
+DEFAULT_MANIFEST = VIRAL_DIR / "data" / "manifest.csv"
+DEFAULT_TCR_LOOKUP = VIRAL_DIR / "data" / "tcr_sequences.csv"
 DEFAULT_OUT_DIR = SCRIPT_DIR / "epytope_tcr_viral"
 OUTPUT_PAIR_SUFFIX = "_structure"
 DATASET = "epytope_tcr_viral"

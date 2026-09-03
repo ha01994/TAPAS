@@ -22,7 +22,7 @@ import train_tabpfn_best as best
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATASET_ROOT = SCRIPT_DIR
+DATASET_ROOT = SCRIPT_DIR / "data"
 RESULTS_DIR = SCRIPT_DIR / "results_auc"
 FOLD_RESULTS_CSV = RESULTS_DIR / "complete_feature_ablation_folds.csv"
 SUMMARY_CSV = RESULTS_DIR / "complete_feature_ablation_summary.csv"

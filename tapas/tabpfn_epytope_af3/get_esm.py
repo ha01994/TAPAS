@@ -19,8 +19,8 @@ from tqdm import tqdm
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_MANIFEST = SCRIPT_DIR / "af3_inputs" / "manifest.csv"
-DEFAULT_TCR_SEQUENCES = SCRIPT_DIR / "af3_inputs" / "tcr_sequences.csv"
+DEFAULT_MANIFEST = SCRIPT_DIR / "data" / "manifest.csv"
+DEFAULT_TCR_SEQUENCES = SCRIPT_DIR / "data" / "tcr_sequences.csv"
 DEFAULT_OUTPUT = SCRIPT_DIR / "esm_embeddings_map.npy"
 
 MODEL_NAME = "esm2_t33_650M_UR50D"

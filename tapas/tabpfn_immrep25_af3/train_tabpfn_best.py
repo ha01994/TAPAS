@@ -37,6 +37,7 @@ warnings.filterwarnings("ignore")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SOURCE_DIR = SCRIPT_DIR
+DATA_DIR = os.path.join(SOURCE_DIR, "data")
 DATASET_ROOT = os.path.dirname(SCRIPT_DIR)
 REPO_ROOT = os.path.dirname(DATASET_ROOT)
 VDJDB_DIR = os.path.join(DATASET_ROOT, "tabpfn_vdjdb_combined_af3")
@@ -47,8 +48,8 @@ DEVICE = "cuda:0"
 os.environ.setdefault("PYTHONHASHSEED", str(SEED))
 os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 
-IMMREP25_PAIRS_CSV = os.path.join(SOURCE_DIR, "immrep25_pairs.csv")
-IMMREP25_TSV = os.path.join(SOURCE_DIR, "immrep25.tsv")
+IMMREP25_PAIRS_CSV = os.path.join(DATA_DIR, "immrep25_pairs.csv")
+IMMREP25_TSV = os.path.join(DATA_DIR, "immrep25.tsv")
 METRICS_BEST_CSV = os.path.join(
     REPO_ROOT, "af3_confidence", "immrep25", "model_quality_metrics_best_af3_ranking_score.csv"
 )
@@ -119,7 +120,7 @@ def set_global_seed(seed: int = SEED) -> None:
 
 
 def _dataset_dir(name: str) -> str:
-    return os.path.join(VDJDB_DIR, name)
+    return os.path.join(VDJDB_DIR, "data", name)
 
 
 def peptide_from_pmhc(pmhc: str) -> str:
