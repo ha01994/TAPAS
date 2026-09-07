@@ -127,3 +127,19 @@ and five SS full-fold datasets.
 ```bash
 python tapas/immrep25/train_tabpfn_ensemble.py
 ```
+
+## SHAP analysis
+
+The SHAP scripts interpret the structural-only TAPAS submodel using the 4 AF3
+confidence and 11 geometry features; ESM-2 features are excluded. Run them from
+the repository root after generating the confidence and geometry feature
+tables:
+
+```bash
+python tapas/vdjdb/shap_rs_ss_fold0.py
+python tapas/epytope/shap_epytope_tcr.py
+python tapas/immrep25/shap_immrep25.py
+```
+
+The scripts save numeric SHAP summaries and figures under their respective
+dataset directories.
