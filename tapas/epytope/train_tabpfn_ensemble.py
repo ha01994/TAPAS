@@ -18,7 +18,7 @@ import torch
 from sklearn.metrics import roc_auc_score
 from tabpfn import TabPFNClassifier
 
-import train_tabpfn_best as best
+import train_tabpfn as best
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent

@@ -8,8 +8,8 @@ The final TAPAS input contains 303 features:
 - 4 AF3 confidence features: `avgipae_pmhc`, `avgipae_tcr`,
   `pdockq2_pmhc`, and `pdockq2_tcr`.
 - 11 AF3 geometry features describing CDR3–peptide contacts and the predicted
-  TCR–pMHC pose. Their exact names are defined in each dataset's
-  `train_tabpfn_best.py`.
+  TCR–pMHC pose. Their exact names are defined in the dataset-specific training
+  scripts.
 - 288 ESM-2 features. Mean-pooled 1,280-dimensional embeddings are generated
   for the peptide and the six TCR CDRs, then reduced by PCA.
 
@@ -108,10 +108,10 @@ maps, run the following dataset-specific scripts from the repository root.
 ### VDJdb
 
 ```bash
-python tapas/vdjdb/train_tabpfn_best.py
+python tapas/vdjdb/train_tabpfn.py
 ```
 
-`train_tabpfn_best.py` evaluates five-fold VDJdb RS and SS. 
+`train_tabpfn.py` evaluates five-fold VDJdb RS and SS.
 
 ### ePytope viral benchmark
 
