@@ -38,7 +38,7 @@ PEP = "E"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-VDJDB_DIR = REPO_ROOT / "tapas" / "tabpfn_vdjdb_combined_af3"
+VDJDB_DIR = REPO_ROOT / "tapas" / "vdjdb"
 DEFAULT_CONDITIONS = ["baseline_default"]
 DEFAULT_OUTPUT_DIRS = [
     REPO_ROOT / "af3_outputs" / "vdjdb",

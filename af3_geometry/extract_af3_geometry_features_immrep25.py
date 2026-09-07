@@ -38,7 +38,7 @@ PEP = "E"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-IMMREP25_DIR = REPO_ROOT / "tapas" / "tabpfn_immrep25_af3"
+IMMREP25_DIR = REPO_ROOT / "tapas" / "immrep25"
 DEFAULT_CONDITIONS = ["baseline_default"]
 DEFAULT_OUTPUT_DIRS = [
     REPO_ROOT / "af3_outputs" / "immrep25",

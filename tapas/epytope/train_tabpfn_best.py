@@ -30,7 +30,7 @@ REPO_ROOT = DEVELOPED_DIR.parent
 RESULTS_DIR = SCRIPT_DIR / "results_auc"
 
 VDJDB_DATASET_DIR = (
-    DEVELOPED_DIR / "tabpfn_vdjdb_combined_af3" / "data" / "dataset_rs"
+    DEVELOPED_DIR / "vdjdb" / "data" / "dataset_rs"
 )
 VDJDB_CONFIDENCE_CSV = (
     REPO_ROOT / "af3_confidence" / "vdjdb"
@@ -41,7 +41,7 @@ VDJDB_GEOMETRY_CSV = (
     / "geometry_features_best_af3_ranking_score.csv"
 )
 VDJDB_ESM_PATH = (
-    DEVELOPED_DIR / "tabpfn_vdjdb_combined_af3" / "esm_embeddings_map_vdjdb.npy"
+    DEVELOPED_DIR / "vdjdb" / "esm_embeddings_map_vdjdb.npy"
 )
 
 VIRAL_MANIFEST_CSV = SCRIPT_DIR / "data" / "manifest.csv"

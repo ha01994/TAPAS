@@ -3,13 +3,11 @@
 
 One model is trained on train+val+test from each RS fold 0-4 and SS fold 0-4.
 Each model fits its ESM-2 PCA on its own 4,298-row training set.  Raw external
-prediction probabilities are averaged pairwise, then Bradley normalization and
-TCRdist small-cluster smoothing are applied to the ensemble prediction.
+prediction probabilities are averaged pairwise.
 """
 
 from __future__ import annotations
 
-import argparse
 import gc
 from pathlib import Path
 
@@ -23,30 +21,13 @@ import train_tabpfn_best as best
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATASET_ROOT = SCRIPT_DIR.parent / "tabpfn_vdjdb_combined_af3" / "data"
+DATASET_ROOT = SCRIPT_DIR.parent / "vdjdb" / "data"
 RESULTS_DIR = SCRIPT_DIR / "results_auc"
 PREDICTIONS_CSV = RESULTS_DIR / "immrep25_tabpfn_ensemble_10model__predictions.csv"
 PER_PEPTIDE_CSV = (
     RESULTS_DIR / "immrep25_tabpfn_ensemble_10model__per_peptide_auc_0.1.csv"
 )
 SUMMARY_CSV = RESULTS_DIR / "immrep25_tabpfn_ensemble_10model__summary.csv"
-SMALLCLUST_INPUT_CSV = (
-    RESULTS_DIR
-    / "immrep25_tabpfn_ensemble_10model__smallclust_input_predictions.csv"
-)
-SMALLCLUST_METRICS_CSV = (
-    RESULTS_DIR / "immrep25_tabpfn_ensemble_10model__smallclust_metrics.csv"
-)
-SMALLCLUST_PREDICTIONS_CSV = (
-    RESULTS_DIR / "immrep25_tabpfn_ensemble_10model__smallclust_predictions.csv"
-)
-SMALLCLUST_CLUSTERS_CSV = (
-    RESULTS_DIR / "immrep25_tabpfn_ensemble_10model__smallclust_clusters.csv"
-)
-SMALLCLUST_CLUSTER_SUMMARY_CSV = (
-    RESULTS_DIR
-    / "immrep25_tabpfn_ensemble_10model__smallclust_cluster_summary.csv"
-)
 
 MODEL_SPECS = [(split, fold) for split in ("rs", "ss") for fold in range(5)]
 EXPECTED_TRAIN_ROWS = 4298
@@ -229,90 +210,9 @@ def per_peptide_auc(labels, scores, peptides) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def postprocess_predictions(predictions: pd.DataFrame) -> dict[str, float]:
-    required = {"id", "tcr_id", "peptide", "pmhc", "label", "ensemble_probability"}
-    missing = sorted(required - set(predictions.columns))
-    if missing:
-        raise ValueError(f"Ensemble predictions are missing columns: {missing}")
-    if len(predictions) != EXPECTED_TEST_ROWS:
-        raise ValueError(
-            f"Expected {EXPECTED_TEST_ROWS} ensemble predictions, "
-            f"found {len(predictions)}"
-        )
-
-    labels = predictions["label"].to_numpy(dtype=int)
-    peptides = predictions["peptide"].to_numpy(dtype=str)
-    normalized = best.bradley_normalize_immrep25(
-        predictions["ensemble_probability"].to_numpy(dtype=float),
-        tcr_ids=predictions["tcr_id"].to_numpy(),
-        peptide_ids=peptides,
-        pmhcs=predictions["pmhc"].to_numpy(),
-    )
-    postprocess_input = predictions.copy()
-    postprocess_input["y_proba_raw"] = postprocess_input["ensemble_probability"]
-    postprocess_input["y_proba_normalized"] = normalized
-    postprocess_input.to_csv(SMALLCLUST_INPUT_CSV, index=False)
-
-    smoothed, metrics, clusters, cluster_summary = best.apply_smallclust(
-        postprocess_input,
-        threshold=best.SMALLCLUST_THRESHOLD,
-    )
-    metrics.to_csv(SMALLCLUST_METRICS_CSV, index=False, float_format="%.4f")
-    smoothed.to_csv(SMALLCLUST_PREDICTIONS_CSV, index=False)
-    clusters.to_csv(SMALLCLUST_CLUSTERS_CSV, index=False)
-    cluster_summary.to_csv(SMALLCLUST_CLUSTER_SUMMARY_CSV, index=False)
-
-    smoothed_row = metrics.loc[
-        metrics["method"] == "smallclust_sqrt_weighted"
-    ].iloc[0]
-    return {
-        "normalized_macro_auc": best.macro_auc(labels, normalized, peptides),
-        "normalized_macro_auc_0.1": best.macro_auc(
-            labels, normalized, peptides, max_fpr=0.1
-        ),
-        "postprocessed_macro_auc": float(smoothed_row["bradley_macro_auc"]),
-        "postprocessed_macro_auc_0.1": float(
-            smoothed_row["bradley_macro_auc_0.1"]
-        ),
-    }
-
-
-def print_postprocessed(metrics: dict[str, float]) -> None:
-    print(f"Normalized Macro-AUC       : {metrics['normalized_macro_auc']:.4f}")
-    print(f"Normalized Macro-AUC@0.1   : {metrics['normalized_macro_auc_0.1']:.4f}")
-    print(f"Postprocessed Macro-AUC    : {metrics['postprocessed_macro_auc']:.4f}")
-    print(
-        "Postprocessed Macro-AUC@0.1: "
-        f"{metrics['postprocessed_macro_auc_0.1']:.4f}"
-    )
-    print(f"Postprocessed predictions  : {SMALLCLUST_PREDICTIONS_CSV}")
-    print(f"Postprocessed metrics      : {SMALLCLUST_METRICS_CSV}")
-
-
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--postprocess-only",
-        action="store_true",
-        help="Postprocess an existing 10-model ensemble prediction CSV.",
-    )
-    args = parser.parse_args()
-
     best.set_global_seed()
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-
-    if args.postprocess_only:
-        require_file(PREDICTIONS_CSV)
-        predictions = pd.read_csv(PREDICTIONS_CSV)
-        postprocessed = postprocess_predictions(predictions)
-        if SUMMARY_CSV.is_file():
-            summary = pd.read_csv(SUMMARY_CSV)
-            for column, value in postprocessed.items():
-                summary[column] = value
-            summary.to_csv(SUMMARY_CSV, index=False, float_format="%.4f")
-        print("\nIMMREP25 TAPAS 10-model ensemble postprocessing")
-        print_postprocessed(postprocessed)
-        return
 
     fold_rows = {
         spec: load_full_fold(*spec)
@@ -389,7 +289,6 @@ def main() -> None:
     predictions["ensemble_probability"] = ensemble_probability
     predictions.to_csv(PREDICTIONS_CSV, index=False)
     peptide_results.to_csv(PER_PEPTIDE_CSV, index=False, float_format="%.8f")
-    postprocessed = postprocess_predictions(predictions)
 
     summary = pd.DataFrame(
         [
@@ -405,7 +304,6 @@ def main() -> None:
                 "n_features": 303,
                 "macro_auc": macro_auc,
                 "macro_auc_0.1": macro_auc_01,
-                **postprocessed,
             }
         ]
     )
@@ -414,7 +312,6 @@ def main() -> None:
     print("\nIMMREP25 TAPAS 10-model ensemble")
     print(f"Macro-AUC     : {macro_auc:.4f}")
     print(f"Macro-AUC@0.1 : {macro_auc_01:.4f}")
-    print_postprocessed(postprocessed)
     print(f"Predictions    : {PREDICTIONS_CSV}")
     print(f"Per-peptide    : {PER_PEPTIDE_CSV}")
     print(f"Summary        : {SUMMARY_CSV}")

@@ -3,8 +3,6 @@
 Source code and benchmark inputs used to reproduce TAPAS, a TabPFN model for
 TCR–pMHC binding prediction. 
 
-## Model features
-
 The final TAPAS input contains 303 features:
 
 - 4 AF3 confidence features: `avgipae_pmhc`, `avgipae_tcr`,
@@ -13,61 +11,11 @@ The final TAPAS input contains 303 features:
   TCR–pMHC pose. Their exact names are defined by `FINAL_GEOMETRY_COLS` in each
   `train_tabpfn_best.py`.
 - 288 ESM-2 features. Mean-pooled 1,280-dimensional embeddings are generated
-  for the peptide and the six TCR CDRs, then reduced by PCA. PCA is fitted only
-  on the relevant VDJdb training rows.
+  for the peptide and the six TCR CDRs, then reduced by PCA.
 
 For every complex, the confidence and geometry tables use the structure with
 the highest AF3 `ranking_score` among its five diffusion samples.
 
-## Repository layout
-
-```text
-.
-├── af3_confidence/
-│   ├── analyze_model_quality_metrics_common.py
-│   ├── analyze_model_quality_metrics_vdjdb.py
-│   ├── analyze_model_quality_metrics_epytope_tcr_viral.py
-│   ├── analyze_model_quality_metrics_immrep25.py
-│   └── pdockq2_json_interface.py
-├── af3_geometry/
-│   ├── extract_af3_geometry_samples_common.py
-│   ├── extract_af3_geometry_features_vdjdb.py
-│   ├── extract_af3_geometry_features_epytope_tcr_viral.py
-│   └── extract_af3_geometry_features_immrep25.py
-└── tapas/
-    ├── tabpfn_vdjdb_combined_af3/
-    │   └── data/
-    │       ├── dataset_rs/                 # VDJdb random split, folds 0–4
-    │       ├── dataset_ss/                 # VDJdb strict split, folds 0–4
-    │       ├── parsed_data_final.csv
-    │       ├── negatives.csv
-    │       ├── dic_full_vavb.csv
-    │       └── mhc_i_protein_seq.csv
-    ├── tabpfn_epytope_af3/
-    │   └── data/
-    │       ├── viral_8peptide.csv
-    │       ├── manifest.csv                # 3,560-pair manifest
-    │       └── tcr_sequences.csv
-    └── tabpfn_immrep25_af3/
-        └── data/
-            ├── immrep25.tsv                # original benchmark table
-            ├── immrep25_pairs.csv
-            ├── immrep25_tcrs.csv
-            └── mhc_i_protein_seq.csv
-```
-
-Precomputed AF3 confidence and geometry feature tables are not distributed.
-The extraction scripts write them to dataset-specific subdirectories under
-`af3_confidence/` and `af3_geometry/`.
-
-The ePytope benchmark in this repository contains exactly 3,560 pairs from 445
-TCRs and these eight viral peptides:
-`AYAQKIFKI`, `CTELKLSDY`, `FPQSAPHGV`, `KCYGVSPTK`, `LTDEMIAQY`,
-`NYNYLYRLF`, `SPRRARSVA`, and `TYGPVFMCL`.
-`tapas/tabpfn_epytope_af3/data/viral_8peptide.csv` contains the
-corresponding 445 cognate TCR rows in the source ePytope table format. ImmRep25
-retains its original 10,000-row `data/immrep25.tsv`; the pair and TCR CSVs are
-deterministic downstream tables used by feature extraction and evaluation.
 
 ## Environment
 
@@ -76,18 +24,13 @@ conda env create -f environment.yml
 conda activate tabpfn
 ```
 
-The ESM preparation scripts use ANARCI. If it is not already available in the
-environment, install it from its upstream repository:
+The ESM preparation scripts use ANARCI. You can install it with the following commands:
 
 ```bash
 git clone https://github.com/oxpig/ANARCI.git
 cd ANARCI
 python setup.py install
 ```
-
-TabPFN and ESM-2 download pretrained weights on first use. A CUDA-capable GPU is
-recommended for training and embedding generation. The scripts default to
-`cuda:0`.
 
 ## Expected AF3 output layout
 
@@ -112,7 +55,7 @@ geometry extraction.
 
 Run commands from the repository root.
 
-#### VDJdb
+### VDJdb
 
 Confidence extraction must run before geometry extraction because the latter
 also uses the generated median-sample selection table.
@@ -121,79 +64,57 @@ also uses the generated median-sample selection table.
 python af3_confidence/analyze_model_quality_metrics_vdjdb.py
 python af3_geometry/extract_af3_geometry_features_vdjdb.py
 
-cd tapas/tabpfn_vdjdb_combined_af3
-python get_esm.py
+python tapas/vdjdb/get_esm.py
 ```
 
 The VDJdb geometry and ESM scripts read their source and lookup tables from
-`tapas/tabpfn_vdjdb_combined_af3/data/`. `get_esm.py` reconstructs
+`tapas/vdjdb/data/`.
+`get_esm.py` reconstructs
 the required peptide and CDR table directly from `parsed_data_final.csv`,
-`negatives.csv`, and `dic_full_vavb.csv`; no `vdjdb123.csv` intermediate is
-required.
+`negatives.csv`, and `dic_full_vavb.csv`.
 
-#### ePytope viral set
+### ePytope viral benchmark
 
 ```bash
 python af3_confidence/analyze_model_quality_metrics_epytope_tcr_viral.py
 python af3_geometry/extract_af3_geometry_features_epytope_tcr_viral.py
 
-cd tapas/tabpfn_epytope_af3
-python get_esm.py --device cuda:0
+python tapas/epytope/get_esm.py
 ```
 
-Use `python get_esm.py --prepare-only` to build and validate the 3,560-row CDR
-table in memory without loading ESM-2. Add `--cdr-csv PATH` only when a copy of
-that intermediate table is needed.
-
-#### ImmRep25
+### ImmRep25
 
 ```bash
 python af3_confidence/analyze_model_quality_metrics_immrep25.py
 python af3_geometry/extract_af3_geometry_features_immrep25.py
 
-cd tapas/tabpfn_immrep25_af3
-python get_esm.py
+python tapas/immrep25/get_esm.py
 ```
-
-The ImmRep25 ESM script reconstructs IMGT CDR1/2/3 features directly from
-`data/immrep25.tsv` and takes pair IDs and labels from
-`data/immrep25_pairs.csv`; no VDJdb-like intermediate CSV is required.
 
 ## Training and evaluation
 
 After generating `esm_embeddings_map_vdjdb.npy` and the external-dataset ESM
 maps, run the dataset-specific scripts from their own directories.
 
-#### VDJdb random and strict splits
+### VDJdb
 
 ```bash
-cd tapas/tabpfn_vdjdb_combined_af3
-python train_tabpfn_best.py
+python tapas/vdjdb/train_tabpfn_best.py
 ```
 
 `train_tabpfn_best.py` evaluates five-fold VDJdb RS and SS. 
 
-#### ePytope viral benchmark
+### ePytope viral benchmark
 
 ```bash
-cd tapas/tabpfn_epytope_af3
-python train_tabpfn_ensemble.py
+python tapas/epytope/train_tabpfn_ensemble.py
 ```
 
 The reported TAPAS value uses the ten-model ensemble trained on the five RS
 and five SS full-fold datasets. 
 
-#### ImmRep25
+### ImmRep25
 
 ```bash
-cd tapas/tabpfn_immrep25_af3
-python train_tabpfn_ensemble.py
+python tapas/immrep25/train_tabpfn_ensemble.py
 ```
-
-ImmRep25 postprocessing is implemented directly in `train_tabpfn_best.py` and
-reused by the ensemble and ablation scripts. Scores are double-centered within
-each HLA-specific TCR-by-peptide matrix. TCRdist3 is then computed from the
-provided CDR1, CDR2, and CDR3 sequences of both alpha and beta chains. Connected
-components at distance 120 implement single-linkage clusters. For each HLA,
-cluster, and peptide, the final score is the cluster mean multiplied by the
-square root of cluster size. 
