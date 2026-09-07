@@ -317,64 +317,6 @@ def write_rows(path: Path, rows: list[dict[str, object]], fieldnames: list[str])
             writer.writerow({key: format_csv_value(row.get(key, "")) for key in fieldnames})
 
 
-def load_median_selection(path: Path) -> dict[str, int]:
-    if not path.exists():
-        raise SystemExit(f"Missing confidence median file: {path}")
-
-    selected: dict[str, int] = {}
-    with path.open(newline="") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            pair_id = row.get("pdb_id") or row.get("pair_id")
-            model_number = safe_int(row.get("model_number"))
-            if pair_id and model_number is not None:
-                selected[str(pair_id)] = model_number
-    return selected
-
-
-def select_median_geometry_rows(
-    sample_rows: list[dict[str, object]],
-    median_selection: dict[str, int],
-    reduced_fieldnames: list[str],
-) -> tuple[list[dict[str, object]], dict[str, int]]:
-    selected_rows: list[dict[str, object]] = []
-    stats = {
-        "median_selection_rows": len(median_selection),
-        "median_geometry_rows": 0,
-        "median_missing_geometry": 0,
-    }
-
-    rows_by_key: dict[tuple[str, int, str], dict[str, object]] = {}
-    conditions_by_pair: dict[str, set[str]] = {}
-    for row in sample_rows:
-        model_number = row.get("model_number")
-        if not isinstance(model_number, int):
-            continue
-        pair_id = str(row["pair_id"])
-        condition = str(row["condition"])
-        rows_by_key[(pair_id, model_number, condition)] = row
-        conditions_by_pair.setdefault(pair_id, set()).add(condition)
-
-    for pair_id, model_number in sorted(median_selection.items()):
-        conditions = sorted(conditions_by_pair.get(pair_id, []))
-        if not conditions:
-            stats["median_missing_geometry"] += 1
-            continue
-        matched = False
-        for condition in conditions:
-            row = rows_by_key.get((pair_id, model_number, condition))
-            if row is None:
-                continue
-            selected_rows.append({key: row.get(key, "") for key in reduced_fieldnames})
-            matched = True
-        if matched:
-            stats["median_geometry_rows"] += 1
-        else:
-            stats["median_missing_geometry"] += 1
-
-    return selected_rows, stats
-
-
 def select_af3_ranking_geometry_rows(
     sample_rows: list[dict[str, object]],
     ranking_selection: dict[str, int],

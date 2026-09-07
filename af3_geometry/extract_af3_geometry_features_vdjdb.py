@@ -21,11 +21,9 @@ from extract_af3_geometry_samples_common import (
     append_rows,
     build_sample_file_index,
     load_af3_ranking_selections,
-    load_median_selection,
     read_existing_sample_rows,
     sample_feature_columns,
     select_af3_ranking_geometry_rows,
-    select_median_geometry_rows,
     write_canonical_feature_outputs,
     write_rows,
 )
@@ -48,10 +46,6 @@ DEFAULT_NEGATIVE_RAW = VDJDB_DIR / "data" / "negatives.csv"
 DEFAULT_TCR_LOOKUP = VDJDB_DIR / "data" / "dic_full_vavb.csv"
 DEFAULT_MHC_LOOKUP = VDJDB_DIR / "data" / "mhc_i_protein_seq.csv"
 DEFAULT_OUT_DIR = SCRIPT_DIR / "vdjdb"
-DEFAULT_CONFIDENCE_MEDIAN = (
-    REPO_ROOT / "af3_confidence" / "vdjdb"
-    / "model_quality_metrics_median_iptm_tcrpmhc.csv"
-)
 B2M_SEQ = "MIQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYYTEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM"
 CONTACT_CUTOFFS = [5.0]
 PAE_CONFIDENT_CUTOFF = 10.0
@@ -852,12 +846,6 @@ def main() -> None:
         type=Path,
         default=DEFAULT_OUT_DIR,
     )
-    parser.add_argument(
-        "--confidence-median",
-        type=Path,
-        default=DEFAULT_CONFIDENCE_MEDIAN,
-        help="CSV from af3_confidence containing the selected median sample per pair.",
-    )
     parser.add_argument("--conditions", default=",".join(DEFAULT_CONDITIONS))
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
@@ -949,20 +937,6 @@ def main() -> None:
         raise SystemExit("No sample-level geometry features extracted; check output directory.")
 
     rows, _, _ = read_existing_sample_rows(all_samples_csv, sample_fieldnames)
-    median_selection = load_median_selection(args.confidence_median)
-    median_rows, median_stats = select_median_geometry_rows(
-        rows,
-        median_selection,
-        fieldnames,
-    )
-    if not median_rows:
-        raise SystemExit("No median-selected geometry features matched confidence selections.")
-    dataset_counts, label_counts = write_canonical_feature_outputs(
-        args.out_dir,
-        median_rows,
-        fieldnames,
-    )
-
     ranking_selection, median_ranking_selection, ranking_load_stats = load_af3_ranking_selections(
         args.output_dir,
         {str(row["pair_id"]) for row in rows},
@@ -977,6 +951,11 @@ def main() -> None:
         raise SystemExit("No AF3 ranking-score-selected geometry features matched sample rows.")
     ranking_out_csv = args.out_dir / "geometry_features_best_af3_ranking_score.csv"
     write_rows(ranking_out_csv, ranking_rows, fieldnames)
+    dataset_counts, label_counts = write_canonical_feature_outputs(
+        args.out_dir,
+        ranking_rows,
+        fieldnames,
+    )
 
     median_ranking_rows, median_ranking_geometry_stats = select_af3_ranking_geometry_rows(
         rows,
@@ -990,18 +969,17 @@ def main() -> None:
     write_rows(median_ranking_out_csv, median_ranking_rows, fieldnames)
 
     auc_path = args.out_dir / "geometry_feature_auc.txt"
-    auc_table(median_rows, auc_path)
+    auc_table(ranking_rows, auc_path)
     out_csv = args.out_dir / "geometry_features.csv"
     summary_path = args.out_dir / "extraction_summary.txt"
     summary_lines = [
         f"Output dirs: {', '.join(str(path) for path in args.output_dir)}",
         f"Conditions: {', '.join(conditions)}",
-        f"Confidence median: {args.confidence_median}",
+        "Canonical selection: best AF3 ranking_score",
         f"Input rows after metadata mapping: {len(pairs)}",
         f"Completed pairs considered: {len(completed_pair_ids)}",
         f"All-sample rows: {len(rows)}",
         f"New all-sample rows: {written_all}",
-        f"Median-selected rows: {len(median_rows)}",
         f"Best AF3 ranking-score rows: {len(ranking_rows)}",
         f"Best AF3 ranking-score CSV: {ranking_out_csv}",
         f"Median AF3 ranking-score rows: {len(median_ranking_rows)}",
@@ -1011,8 +989,6 @@ def main() -> None:
         f"Missing sample files: {missing_sample_files}",
         f"All-samples CSV: {all_samples_csv}",
     ]
-    for key, value in sorted(median_stats.items()):
-        summary_lines.append(f"{key}: {value}")
     for key, value in sorted(ranking_load_stats.items()):
         summary_lines.append(f"{key}: {value}")
     for key, value in sorted(ranking_geometry_stats.items()):
@@ -1030,7 +1006,6 @@ def main() -> None:
     print(f"Input rows after metadata mapping: {len(pairs)}")
     print(f"Completed pairs considered: {len(completed_pair_ids)}")
     print(f"All-sample rows: {len(rows)}  new rows: {written_all}")
-    print(f"Median-selected rows: {len(median_rows)}")
     print(f"Best AF3 ranking-score rows: {len(ranking_rows)}")
     print(f"Median AF3 ranking-score rows: {len(median_ranking_rows)}")
     print(f"Missing sample dirs: {missing_sample_dirs}  missing sample files: {missing_sample_files}")

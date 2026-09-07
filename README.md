@@ -8,14 +8,14 @@ The final TAPAS input contains 303 features:
 - 4 AF3 confidence features: `avgipae_pmhc`, `avgipae_tcr`,
   `pdockq2_pmhc`, and `pdockq2_tcr`.
 - 11 AF3 geometry features describing CDR3–peptide contacts and the predicted
-  TCR–pMHC pose. Their exact names are defined by `FINAL_GEOMETRY_COLS` in each
+  TCR–pMHC pose. Their exact names are defined in each dataset's
   `train_tabpfn_best.py`.
 - 288 ESM-2 features. Mean-pooled 1,280-dimensional embeddings are generated
   for the peptide and the six TCR CDRs, then reduced by PCA.
 
-For every complex, the confidence and geometry tables use the structure with
-the highest AF3 `ranking_score` among its five diffusion samples.
-
+For every complex, the training scripts use confidence and geometry features
+from the structure with the highest AF3 `ranking_score` among its five
+diffusion samples.
 
 ## Environment
 
@@ -24,7 +24,8 @@ conda env create -f environment.yml
 conda activate tabpfn
 ```
 
-The ESM preparation scripts use ANARCI. You can install it with the following commands:
+The ePytope and ImmRep25 ESM preparation scripts use ANARCI. Install it with
+the following commands:
 
 ```bash
 git clone https://github.com/oxpig/ANARCI.git
@@ -57,9 +58,6 @@ Run commands from the repository root.
 
 ### VDJdb
 
-Confidence extraction must run before geometry extraction because the latter
-also uses the generated median-sample selection table.
-
 ```bash
 python af3_confidence/analyze_model_quality_metrics_vdjdb.py
 python af3_geometry/extract_af3_geometry_features_vdjdb.py
@@ -82,6 +80,12 @@ python af3_geometry/extract_af3_geometry_features_epytope_tcr_viral.py
 python tapas/epytope/get_esm.py
 ```
 
+The ePytope geometry and ESM scripts read the active pair manifest and
+full-chain TCR sequences from `tapas/epytope/data/manifest.csv` and
+`tapas/epytope/data/tcr_sequences.csv`. `get_esm.py` uses ANARCI/IMGT to derive
+CDR1/2 and validates the manifest-provided CDR3 sequences against the ANARCI
+assignments.
+
 ### ImmRep25
 
 ```bash
@@ -91,10 +95,15 @@ python af3_geometry/extract_af3_geometry_features_immrep25.py
 python tapas/immrep25/get_esm.py
 ```
 
+The ImmRep25 geometry script reads `immrep25_pairs.csv`, `immrep25_tcrs.csv`,
+and `mhc_i_protein_seq.csv` from `tapas/immrep25/data/`. `get_esm.py`
+reconstructs the peptide and six TCR CDR inputs directly from
+`data/immrep25.tsv` and `data/immrep25_pairs.csv` using ANARCI/IMGT.
+
 ## Training and evaluation
 
 After generating `esm_embeddings_map_vdjdb.npy` and the external-dataset ESM
-maps, run the dataset-specific scripts from their own directories.
+maps, run the following dataset-specific scripts from the repository root.
 
 ### VDJdb
 
